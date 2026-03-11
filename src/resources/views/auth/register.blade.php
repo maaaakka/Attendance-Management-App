@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-ログイン
+会員登録
 @endsection
 
 @section('css')
@@ -12,10 +12,18 @@
 
 <div class="auth-card">
 
-<h2 class="auth-title">ログイン</h2>
+<h2 class="auth-title">会員登録</h2>
 
-<form method="POST" action="/login">
+<form method="POST" action="/register">
 @csrf
+
+<div class="form-group">
+    <label>名前</label>
+    <input type="text" name="name" value="{{ old('name') }}">
+    @error('name')
+        <p class="error">{{ $message }}</p>
+    @enderror
+</div>
 
 <div class="form-group">
     <label>メールアドレス</label>
@@ -33,13 +41,18 @@
     @enderror
 </div>
 
-<button class="auth-button">ログインする
+<div class="form-group">
+    <label>パスワード確認</label>
+    <input type="password" name="password_confirmation">
+</div>
+
+<button class="auth-button">登録する
 </button>
 
 </form>
 
 <div class="auth-link">
-    <a href="/register">会員登録はこちら</a>
+    <a href="/login">ログインはこちら</a>
 </div>
 
 </div>
