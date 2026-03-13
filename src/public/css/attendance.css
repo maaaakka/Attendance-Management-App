@@ -55,3 +55,65 @@
     font-size: 16px;
     border-radius: 5px;
 }
+
+.attendance-list {
+    width: 900px;
+    margin: 40px auto;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    border-left: 5px solid #000;
+    padding-left: 10px;
+}
+
+.month-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f3f3f3;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.month {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.month-nav a {
+    text-decoration: none;
+    color: #333;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.attendance-table th {
+    background: #f8f8f8;
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 2px solid #ddd;
+}
+
+.attendance-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.attendance-table tr:hover {
+    background: #fafafa;
+}
+
+.detail-btn {
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+}

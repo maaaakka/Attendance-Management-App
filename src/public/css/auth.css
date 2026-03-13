@@ -9,6 +9,11 @@
     text-align: center;
     margin-bottom: 30px;
 }
+.auth-text {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 25px;
+}
 
 .form-group {
     margin-bottom: 20px;
@@ -36,6 +41,26 @@
     margin-top: 20px;
 }
 
+.auth-main-btn {
+    display: block;
+    width: 220px;
+    margin: 30px auto;
+    /* 中央配置 */
+
+    padding: 12px;
+    background: #dbdbdb;
+
+    color: #000;
+    font-weight: bold;
+
+    border: 2px solid #000;
+    border-radius: 8px;
+
+    text-align: center;
+    text-decoration: none;
+    /* 下線消す */
+}
+
 .auth-link {
     text-align: center;
     margin-top: 18px;
@@ -45,4 +70,17 @@
 .auth-link a {
     color: #007bff;
     text-decoration: none;
+}
+
+.auth-resend {
+    background: none;
+    border: none;
+
+    color: #007bff;
+    font-size: 14px;
+
+    cursor: pointer;
+
+    display: block;
+    margin: 20px auto;
 }

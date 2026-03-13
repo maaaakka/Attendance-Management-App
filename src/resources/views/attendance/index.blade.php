@@ -38,18 +38,31 @@
 
             {{-- 出勤前 --}}
             @if ($status == 0)
+            <form method="POST" action="{{ route('attendance.start') }}">
+                @csrf
                 <button class="btn-work">出勤</button>
+            </form>
             @endif
 
             {{-- 出勤中 --}}
             @if ($status == 1)
+            <form method="POST" action="{{ route('attendance.end') }}">
+                @csrf
                 <button class="btn-work">退勤</button>
+            </form>
+
+            <form method="POST" action="{{ route('attendance.break.start') }}">
+                @csrf
                 <button class="btn-rest">休憩入</button>
+            </form>
             @endif
 
             {{-- 休憩中 --}}
             @if ($status == 2)
+            <form method="POST" action="{{ route('attendance.break.end') }}">
+                @csrf
                 <button class="btn-rest">休憩戻</button>
+            </form>
             @endif
 
             {{-- 退勤済 --}}
