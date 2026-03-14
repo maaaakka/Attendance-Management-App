@@ -24,8 +24,12 @@
         </div>
 
         {{-- 日付 --}}
+        @php
+        $week = ['日','月','火','水','木','金','土'];
+        @endphp
+
         <div class="date">
-            {{ now()->format('Y年n月j日 (D)') }}
+        {{ now()->format('Y年n月j日') }}（{{ $week[now()->dayOfWeek] }}）
         </div>
 
         {{-- 時刻 --}}

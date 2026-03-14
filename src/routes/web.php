@@ -46,4 +46,14 @@ Route::middleware(['auth','verified'])->group(function () {
     // 勤怠詳細
     Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])
         ->name('attendance.detail');
+
+    // 勤怠詳細
+    Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])
+    ->name('attendance.detail');
+
+    // 修正申請
+    Route::post('/attendance/request/{id}',
+        [AttendanceController::class,'requestCorrection']
+    )->name('attendance.request');
+
 });

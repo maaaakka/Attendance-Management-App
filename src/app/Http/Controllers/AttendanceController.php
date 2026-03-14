@@ -8,6 +8,11 @@ use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
 use App\Models\BreakTime;
+use App\Models\CorrectionRequestAttendance;
+use App\Models\CorrectionRequestBreak;
+
+use App\Http\Requests\AttendanceRequest;
+
 
 class AttendanceController extends Controller
 {
@@ -111,29 +116,111 @@ class AttendanceController extends Controller
 
     // 勤怠一覧
     public function list(Request $request)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    $month = $request->input('month', Carbon::now()->format('Y-m'));
+        $month = $request->input('month', Carbon::now()->format('Y-m'));
 
-    $start = Carbon::parse($month)->startOfMonth();
-    $end = Carbon::parse($month)->endOfMonth();
+        $start = Carbon::parse($month)->startOfMonth();
+        $end = Carbon::parse($month)->endOfMonth();
 
-    // 勤怠データ取得
-    $attendances = Attendance::where('user_id', $user->id)
-        ->whereBetween('work_date', [$start, $end])
-        ->get()
-        ->keyBy(function ($item) {
-            return Carbon::parse($item->work_date)->format('Y-m-d');
-        });
+        // 勤怠データ取得
+        $attendances = Attendance::where('user_id', $user->id)
+            ->whereBetween('work_date', [$start, $end])
+            ->get()
+            ->keyBy(function ($item) {
+                return Carbon::parse($item->work_date)->format('Y-m-d');
+            });
 
-    // 1ヶ月の日付
-    $dates = CarbonPeriod::create($start, $end);
+        // 1ヶ月の日付
+        $dates = CarbonPeriod::create($start, $end);
 
-    return view('attendance.list', compact(
-        'dates',
-        'attendances',
-        'month'
-    ));
-}
+        return view('attendance.list', compact(
+            'dates',
+            'attendances',
+            'month'
+        ));
+    }
+
+    // 詳細
+    public function detail($id)
+    {
+        $attendance = Attendance::with('breakTimes','user')->find($id);
+
+        // 出勤していない日
+        if(!$attendance){
+
+            $attendance = new Attendance();
+            $attendance->id = null;
+            $attendance->user_id = Auth::id();
+            $attendance->work_date = $id;
+            $attendance->breakTimes = collect();
+
+        }
+
+        $pendingRequest = null;
+
+        if($attendance->id){
+            $pendingRequest = CorrectionRequestAttendance::where('attendance_id',$attendance->id)
+                ->where('status','pending')
+                ->first();
+        }
+
+        return view('attendance.detail',compact(
+            'attendance',
+            'pendingRequest'
+        ));
+
+    }
+
+    // 修正申請
+    public function requestCorrection(AttendanceRequest $request,$id)
+    {
+
+        $attendance = Attendance::with('breakTimes')->findOrFail($id);
+
+        // 勤怠修正申請
+        $correction = CorrectionRequestAttendance::create([
+
+            'attendance_id' => $attendance->id,
+            'user_id' => auth()->id(),
+
+            'work_start_datetime' => $request->work_start_datetime,
+            'work_end_datetime' => $request->work_end_datetime,
+
+            'note' => $request->note,
+            'status' => 'pending'
+
+        ]);
+
+
+        // 休憩修正申請
+        if($request->break_start){
+
+            foreach($request->break_start as $index => $start){
+
+                if(!$start) continue;
+
+                $breakId = $attendance->breakTimes[$index]->id ?? null;
+
+                CorrectionRequestBreak::create([
+
+                    'request_id' => $correction->id,
+
+                    'break_id' => $breakId,
+
+                    'break_start' => $start,
+
+                    'break_end' => $request->break_end[$index] ?? null
+
+                ]);
+
+            }
+
+        }
+
+        return redirect()
+            ->route('attendance.list')
+            ->with('success','修正申請を送信しました');
+    }
 }
