@@ -9,27 +9,28 @@ use Illuminate\Database\Seeder;
 
 class AttendanceSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
         $users = User::all();
 
-        foreach ($users as $user) {
+        //  前日から10日間
+        for ($day = 0; $day < 10; $day++) {
 
-            for ($i = 0; $i < 5; $i++) {
+            $date = Carbon::yesterday()->subDays($day);
 
-                $date = Carbon::now()->subDays($i);
+            foreach ($users as $user) {
 
                 Attendance::create([
                     'user_id' => $user->id,
                     'work_date' => $date,
-                    'work_start_datetime' => $date->copy()->setTime(9,0),
-                    'work_end_datetime' => $date->copy()->setTime(18,0),
-                    'status' => 1
+
+                    // ⭐ 全員固定
+                    'work_start_datetime' => $date->copy()->setTime(9, 0),
+                    'work_end_datetime' => $date->copy()->setTime(18, 0),
+
+                    // ⭐ 退勤済
+                    'status' => Attendance::STATUS_LEFT,
+
                 ]);
             }
         }

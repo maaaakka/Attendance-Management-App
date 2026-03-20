@@ -84,3 +84,8 @@
     display: block;
     margin: 20px auto;
 }
+
+.auth-success {
+    text-align: center;
+    color: #999;
+}

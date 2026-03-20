@@ -10,207 +10,214 @@
 
 <h2 class="page-title">勤怠詳細</h2>
 
-<form method="POST" action="{{ route('attendance.request',$attendance->id) }}">
-@csrf
+<form method="POST" action="{{ route('attendance.request', $attendance->id ?: $attendance->work_date) }}">
+    @csrf
+
+    <input type="hidden" name="work_date" value="{{ $attendance->work_date }}">
+
+    <table class="detail-table">
+
+    {{-- 名前 --}}
+    <tr>
+        <th>名前</th>
+        <td>
+            {{ $attendance->user->name ?? auth()->user()->name }}
+        </td>
+    </tr>
+
+    {{-- 日付 --}}
+    <tr>
+        <th>日付</th>
+        <td>
+            <div class="date-row">
+                <span class="year">
+                    {{ \Carbon\Carbon::parse($attendance->work_date)->format('Y年') }}
+                </span>
+                <span class="month-day">
+                    {{ \Carbon\Carbon::parse($attendance->work_date)->format('n月j日') }}
+                </span>
+            </div>
+        </td>
+    </tr>
+
+    {{-- 出退勤 --}}
+    <tr>
+        <th>出勤・退勤</th>
+        <td>
 
-<table class="detail-table">
+        @if($pendingRequest)
 
-<tr>
-<th>名前</th>
-<td>
-{{ $attendance->user->name ?? auth()->user()->name }}
-</td>
-</tr>
+            {{ \Carbon\Carbon::parse($pendingRequest->requested_work_start_datetime)->format('H:i') }}
+            ～
+            {{ \Carbon\Carbon::parse($pendingRequest->requested_work_end_datetime)->format('H:i') }}
 
-<tr>
-<th>日付</th>
-<td>
+        @else
 
-<div class="date-row">
+            <div class="time-group">
+                <input type="time" name="work_start_datetime"
+                    value="{{ old('work_start_datetime', $attendance->work_start_datetime ? \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i') : '') }}">
 
-<span class="year">
-{{ \Carbon\Carbon::parse($attendance->work_date)->format('Y年') }}
-</span>
+                <span class="time-sep">～</span>
 
-<span class="month-day">
-{{ \Carbon\Carbon::parse($attendance->work_date)->format('n月j日') }}
-</span>
+                <input type="time" name="work_end_datetime"
+                    value="{{ old('work_end_datetime', $attendance->work_end_datetime ? \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i') : '') }}">
+            </div>
 
-</div>
+            @error('work_start_datetime')
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-</td>
-</tr>
-<th>出勤・退勤</th>
-<td>
+            @error('work_end_datetime')
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-@if(!$pendingRequest)
+        @endif
+
+        </td>
+    </tr>
+
+    @php
+        $breaks = $pendingRequest ? $pendingRequest->breaks : $attendance->breakTimes;
+    @endphp
+
+    {{-- 休憩 --}}
+    @if($breaks->isEmpty())
 
-<div class="time-group">
+    <tr>
+        <th>休憩1</th>
+        <td>
 
-<input type="time"
-name="work_start_datetime"
-value="{{ $attendance->work_start_datetime ? \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i') : '' }}">
+        @if($pendingRequest)
+            {{-- 空表示 --}}
+        @else
+            <div class="time-group">
+                <input type="time" name="break_start[]" value="{{ old('break_start.0') }}">
+                <span class="time-sep">～</span>
+                <input type="time" name="break_end[]" value="{{ old('break_end.0') }}">
+            </div>
 
-<span class="time-sep">～</span>
+            @error("break_start.0")
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-<input type="time"
-name="work_end_datetime"
-value="{{ $attendance->work_end_datetime ? \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i') : '' }}">
+            @error("break_end.0")
+                <p class="error">{{ $message }}</p>
+            @enderror
+        @endif
 
-</div>
-@error('work_start_datetime')
-<p class="error">{{ $message }}</p>
-@enderror
-@error('work_end_datetime')
-<p class="error">{{ $message }}</p>
-@enderror
-@else
+        </td>
+    </tr>
 
-{{ \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i') }}
-～
-{{ \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i') }}
+    @else
 
-@endif
+        @foreach($breaks as $index => $break)
+        <tr>
+            <th>休憩{{ $index+1 }}</th>
+            <td>
 
-</td>
-</tr>
+            @if($pendingRequest)
 
+                {{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}
+                ～
+                {{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}
 
-{{-- 休憩 --}}
-@foreach($attendance->breakTimes as $index => $break)
+            @else
 
-<tr>
+                <div class="time-group">
+                    <input type="time" name="break_start[]"
+                        value="{{ old("break_start.$index", \Carbon\Carbon::parse($break->break_start)->format('H:i')) }}">
 
-<th>休憩{{ $index+1 }}</th>
+                    <span class="time-sep">～</span>
 
-<td>
+                    <input type="time" name="break_end[]"
+                        value="{{ old("break_end.$index", $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '') }}">
+                </div>
 
-@if(!$pendingRequest)
+                @error("break_start.$index")
+                    <p class="error">{{ $message }}</p>
+                @enderror
 
-<div class="time-group">
+                @error("break_end.$index")
+                    <p class="error">{{ $message }}</p>
+                @enderror
 
-<input type="time"
-name="break_start[]"
-value="{{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}">
+            @endif
 
-<span class="time-sep">～</span>
+            </td>
+        </tr>
+        @endforeach
 
-<input type="time"
-name="break_end[]"
-value="{{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}">
+    @endif
 
-</div>
+    {{-- 休憩追加 --}}
+    @if(!$pendingRequest && $breaks->isNotEmpty())
+    @php
+        $nextIndex = count($breaks);
+    @endphp
 
-{{-- エラー表示 --}}
-@error("break_start.$index")
-<p class="error">{{ $message }}</p>
-@enderror
+    <tr>
+        <th>休憩{{ $nextIndex + 1 }}</th>
+        <td>
 
-@error("break_end.$index")
-<p class="error">{{ $message }}</p>
-@enderror
+            <div class="time-group">
+                <input type="time" name="break_start[]" value="{{ old("break_start.$nextIndex") }}">
+                <span class="time-sep">～</span>
+                <input type="time" name="break_end[]" value="{{ old("break_end.$nextIndex") }}">
+            </div>
 
-@else
+            @error("break_start.$nextIndex")
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-{{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}
-～
-{{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}
+            @error("break_end.$nextIndex")
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-@endif
+        </td>
+    </tr>
+    @endif
 
-</td>
+    {{-- 備考 --}}
+    <tr>
+        <th>備考</th>
+        <td>
 
-</tr>
+        @if($pendingRequest)
 
-@endforeach
+            {{ $pendingRequest->requested_note }}
 
+        @else
 
-{{-- 休憩追加 --}}
-@if(!$pendingRequest)
+            <textarea name="note" class="note-area">{{ old('note', $attendance->note) }}</textarea>
 
-@php
-$nextIndex = count($attendance->breakTimes);
-@endphp
+            @error('note')
+                <p class="error">{{ $message }}</p>
+            @enderror
 
-<tr>
+        @endif
 
-<th>休憩{{ $nextIndex + 1 }}</th>
+        </td>
+    </tr>
 
-<td>
+    </table>
 
-<div class="time-group">
+    {{-- 承認待ち --}}
+    @if($pendingRequest)
+        <p class="pending-message">
+            *承認待ちのため修正はできません。
+        </p>
+    @endif
 
-<input type="time" name="break_start[]">
-
-<span class="time-sep">～</span>
-
-<input type="time" name="break_end[]">
-
-</div>
-
-{{-- 追加休憩のエラー --}}
-@error("break_start.$nextIndex")
-<p class="error">{{ $message }}</p>
-@enderror
-
-@error("break_end.$nextIndex")
-<p class="error">{{ $message }}</p>
-@enderror
-
-</td>
-
-</tr>
-
-@endif
-
-<th>備考</th>
-
-<td>
-
-@if(!$pendingRequest)
-
-<textarea name="note" class="note-area">
-{{ $attendance->note }}
-</textarea>
-@error('note')
-<p class="error">{{ $message }}</p>
-@enderror
-@else
-
-{{ $attendance->note }}
-
-@endif
-
-</td>
-
-</tr>
-
-</table>
-
-
-@if($pendingRequest)
-
-<p class="pending-message">
-*承認待ちのため修正はできません。
-</p>
-
-@endif
-
-
-@if(!$pendingRequest)
-
-<div class="btn-area">
-
-<button type="submit" class="btn-edit">
-修正
-</button>
-
-</div>
-
-@endif
+    {{-- ボタン --}}
+    @if(!$pendingRequest)
+        <div class="btn-area">
+            <button type="submit" class="btn-edit">
+                修正
+            </button>
+        </div>
+    @endif
 
 </form>
 
 </div>
-
 @endsection

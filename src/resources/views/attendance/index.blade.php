@@ -6,19 +6,21 @@
 
 @section('content')
 
+@php use App\Models\Attendance; @endphp
+
 <div class="attendance-wrapper">
 
     <div class="attendance-card">
 
         {{-- ステータス表示 --}}
         <div class="status">
-            @if ($status == 0)
+            @if ($status == Attendance::STATUS_OFF_WORK)
                 勤務外
-            @elseif ($status == 1)
+            @elseif ($status == Attendance::STATUS_WORKING)
                 出勤中
-            @elseif ($status == 2)
+            @elseif ($status == Attendance::STATUS_ON_BREAK)
                 休憩中
-            @elseif ($status == 3)
+            @elseif ($status == Attendance::STATUS_LEFT)
                 退勤済
             @endif
         </div>
@@ -41,7 +43,7 @@
         <div class="buttons">
 
             {{-- 出勤前 --}}
-            @if ($status == 0)
+            @if ($status == Attendance::STATUS_OFF_WORK)
             <form method="POST" action="{{ route('attendance.start') }}">
                 @csrf
                 <button class="btn-work">出勤</button>
@@ -49,7 +51,7 @@
             @endif
 
             {{-- 出勤中 --}}
-            @if ($status == 1)
+            @if ($status == Attendance::STATUS_WORKING)
             <form method="POST" action="{{ route('attendance.end') }}">
                 @csrf
                 <button class="btn-work">退勤</button>
@@ -62,7 +64,7 @@
             @endif
 
             {{-- 休憩中 --}}
-            @if ($status == 2)
+            @if ($status == Attendance::STATUS_ON_BREAK)
             <form method="POST" action="{{ route('attendance.break.end') }}">
                 @csrf
                 <button class="btn-rest">休憩戻</button>
@@ -70,7 +72,7 @@
             @endif
 
             {{-- 退勤済 --}}
-            @if ($status == 3)
+            @if ($status == Attendance::STATUS_LEFT)
                 <p>お疲れ様でした。</p>
             @endif
 
@@ -79,5 +81,4 @@
     </div>
 
 </div>
-
 @endsection

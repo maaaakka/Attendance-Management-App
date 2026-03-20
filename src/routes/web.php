@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\StampCorrectionRequestController;
 
 
 /*
@@ -43,17 +44,20 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::get('/attendance/list', [AttendanceController::class, 'list'])
         ->name('attendance.list');
 
-    // 勤怠詳細
+    // 勤怠詳細(既存データ)
     Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])
         ->name('attendance.detail');
 
-    // 勤怠詳細
-    Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])
-    ->name('attendance.detail');
+    // 勤怠詳細(追加データ)
+    Route::get('/attendance/detail/date/{date}', [AttendanceController::class, 'detailByDate'])
+        ->name('attendance.detail.date');
 
     // 修正申請
-    Route::post('/attendance/request/{id}',
-        [AttendanceController::class,'requestCorrection']
-    )->name('attendance.request');
+    Route::post('/attendance/request/{id}',[AttendanceController::class,'requestCorrection']
+        )->name('attendance.request');
+
+    // 申請一覧
+    Route::get('/stamp_correction_request/list',[StampCorrectionRequestController::class,'list']
+        )->name('stamp_correction_request.list');
 
 });

@@ -64,17 +64,31 @@ class AttendanceRequest extends FormRequest
 
                 foreach ($breakStarts as $index => $breakStart) {
 
-                    if (!$breakStart || !$breakEnds[$index]) {
+                    $breakEnd = $breakEnds[$index] ?? null;
+
+                    // 片方だけ入力チェック
+                    if (($breakStart && !$breakEnd) || (!$breakStart && $breakEnd)) {
+
+                        $validator->errors()->add(
+                            "break_start.$index",
+                            '休憩開始時間と終了時間を入力してください'
+                        );
+
+                        continue;
+                    }
+
+                    // 両方空ならスキップ
+                    if (!$breakStart && !$breakEnd) {
                         continue;
                     }
 
                     $bs = strtotime($breakStart);
-                    $be = strtotime($breakEnds[$index]);
+                    $be = strtotime($breakEnd);
 
                     // 休憩開始チェック
                     if ($bs < $start || $bs > $end) {
                         $validator->errors()->add(
-                            'break_start',
+                            "break_start.$index",
                             '休憩時間が不適切な値です'
                         );
                     }
@@ -82,7 +96,7 @@ class AttendanceRequest extends FormRequest
                     // 休憩終了チェック
                     if ($be > $end) {
                         $validator->errors()->add(
-                            'break_end',
+                            "break_end.$index",
                             '休憩時間もしくは退勤時間が不適切な値です'
                         );
                     }

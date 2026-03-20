@@ -1,0 +1,100 @@
+/* 全体背景 */
+body {
+    background-color: #f5f5f5;
+}
+
+/* タイトル */
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    border-left: 4px solid #000;
+    padding-left: 10px;
+    margin-bottom: 50px;
+}
+
+/* タブ */
+.tab-menu {
+    display: flex;
+    gap: 60px;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 30px;
+}
+
+.tab-menu a {
+    text-decoration: none;
+    color: #666;
+    padding-bottom: 14px;
+}
+
+.tab-menu a.active {
+    color: #000;
+    font-weight: bold;
+    
+}
+
+/* テーブル全体 */
+.request-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.request-table a {
+    text-decoration: none;
+    /* 下線消す */
+    color: #000;
+    /* 黒にする */
+    font-weight: bold;
+    /* 太文字 */
+}
+
+/* ヘッダー */
+.request-table th {
+    padding: 12px;
+    border-bottom: 2px solid #ddd;
+    color: #999;
+    font-size: 14px;
+}
+
+/* データ */
+.request-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* 行ホバー（任意） */
+.request-table tr:hover {
+    background-color: #fafafa;
+}
+
+.request-list {
+    width: 900px;
+    margin: 40px auto;
+}
+
+.tab-menu {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.request-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.request-table th {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    color: #666;
+}
+
+.request-table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
