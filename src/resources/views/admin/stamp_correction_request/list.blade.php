@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin_app')
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/list.css') }}">
@@ -55,7 +55,7 @@
 </td>
 
 <td>
-<a href="{{ route('attendance.detail',$request->attendance_id) }}">
+<a href="/stamp_correction_request/approve/{{ $request->id }}">
 詳細
 </a>
 </td>
@@ -85,7 +85,7 @@
 </td>
 
 <td>
-<a href="{{ route('attendance.detail',$request->attendance_id) }}">
+<a href="/stamp_correction_request/approve/{{ $request->id }}">
 詳細
 </a>
 </td>

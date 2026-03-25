@@ -263,3 +263,20 @@ input[type="time"]{
     text-align: right;
     width: 100%;
 }
+
+.btn-approve {
+    display: inline-block;
+    width: auto;
+    background: black;
+    color: white;
+    font-weight: bold;
+    padding: 8px 35px;
+    border: none;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+}
+
+.btn-approve:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}

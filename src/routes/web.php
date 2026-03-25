@@ -1,8 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+// use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\StampCorrectionRequestController;
+use App\Http\Controllers\AdminAttendanceController;
+use Illuminate\Support\Facades\Auth;
+
+
 
 
 /*
@@ -16,6 +21,10 @@ use App\Http\Controllers\StampCorrectionRequestController;
 |
 */
 
+Route::get('/stamp_correction_request/list',[StampCorrectionRequestController::class,'list']
+        )->name('stamp_correction_request.list');
+
+// 一般ユーザー
 Route::get('/', function () {
     return redirect('/login');
 });
@@ -57,7 +66,46 @@ Route::middleware(['auth','verified'])->group(function () {
         )->name('attendance.request');
 
     // 申請一覧
-    Route::get('/stamp_correction_request/list',[StampCorrectionRequestController::class,'list']
-        )->name('stamp_correction_request.list');
+    // Route::get('/stamp_correction_request/list',[StampCorrectionRequestController::class,'list']
+    //     )->name('stamp_correction_request.list');
+            // ->middleware('auth');
+});
 
+
+// 管理者ログイン画面
+Route::get('/admin/login', function () {
+    return view('admin.login');
+});
+
+// 管理者ログイン処理
+Route::post('/admin/login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store']);
+
+// ログアウト
+Route::post('/admin/logout', function (Illuminate\Http\Request $request) {
+    Auth::guard('admin')->logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect('/admin/login');
+})->name('admin.logout');
+
+
+// 管理者専用
+Route::middleware('auth:admin')->group(function () {
+
+    // 勤怠一覧
+    Route::get('/admin/attendance/list', [AdminAttendanceController::class, 'list']);
+
+    // 詳細
+    Route::get('/admin/attendance/{id}', [AdminAttendanceController::class, 'detail']);
+
+    // 更新
+    Route::post('/admin/attendance/{id}', [AdminAttendanceController::class, 'update'])
+        ->name('admin.attendance.update');
+
+    // 修正申請
+    Route::get('/stamp_correction_request/approve/{id}', [StampCorrectionRequestController::class, 'approve'])
+        ->name('stamp_correction_request.approve');
+
+    Route::post('/stamp_correction_request/approve/{id}', [StampCorrectionRequestController::class, 'approveUpdate'])
+        ->name('stamp_correction_request.approve.update');
 });

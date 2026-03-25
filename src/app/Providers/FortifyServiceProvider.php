@@ -6,28 +6,37 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use App\Models\Admin;
+use App\Http\Responses\LoginResponse;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Illuminate\Support\Facades\Auth;
+
 
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        // ★ここ重要
+        $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
+
+    if (request()->is('admin/*')) {
+        config(['fortify.guard' => 'admin']);
+    }
+
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
@@ -45,11 +54,56 @@ class FortifyServiceProvider extends ServiceProvider
             return view('auth.verify-email');
         });
 
-        RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+        Fortify::authenticateUsing(function (Request $request) {
 
-            return Limit::perMinute(5)->by($throttleKey);
+            Validator::make($request->all(), [
+                'email' => ['required'],
+                'password' => ['required'],
+            ], [
+                'email.required' => 'メールアドレスを入力してください',
+                'password.required' => 'パスワードを入力してください',
+            ])->validate();
+
+            // ★管理者（ここ変更）
+                if ($request->is('admin/*')) {
+
+                $admin = Admin::where('email', $request->email)->first();
+
+                // dd([
+                //     'message' => '管理者テーブルを確認中',
+                //     'request_url' => $request->fullUrl(),
+                //     'found_admin' => $admin,
+                // ]);
+
+                if ($admin && Hash::check($request->password, $admin->password)) {
+                    return $admin;
+                }
+
+                throw ValidationException::withMessages([
+                    'email' => ['ログイン情報が登録されていません'],
+                ]);
+            }
+
+            // 一般ユーザー
+            $user = User::where('email', $request->email)->first();
+
+            // dd([
+            //     'message' => '一般ユーザーテーブルを確認中',
+            //     'found_user' => $user,
+            // ]);
+
+            if ($user && Hash::check($request->password, $user->password)) {
+                return $user;
+            }
+
+            throw ValidationException::withMessages([
+                'email' => ['ログイン情報が登録されていません'],
+            ]);
         });
 
+        RateLimiter::for('login', function (Request $request) {
+            $throttleKey = Str::lower($request->input('email')).'|'.$request->ip();
+            return Limit::perMinute(5)->by($throttleKey);
+        });
     }
 }
