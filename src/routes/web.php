@@ -102,6 +102,10 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/attendance/{id}', [AdminAttendanceController::class, 'update'])
         ->name('admin.attendance.update');
 
+    // 新規作成
+    Route::post('/admin/attendance', [AdminAttendanceController::class, 'store'])
+        ->name('admin.attendance.store');
+
     // 修正申請
     Route::get('/stamp_correction_request/approve/{id}', [StampCorrectionRequestController::class, 'approve'])
         ->name('stamp_correction_request.approve');

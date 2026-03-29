@@ -27,7 +27,14 @@
     <tr>
         <th>日付</th>
         <td>
-            {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('Y年n月j日') }}
+            <div class="date-row">
+                <span class="year">
+                {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('Y年') }}
+                </span>
+                <span class="month-day">
+                    {{ \Carbon\Carbon::parse($request->attendance->work_date)->format('n月j日') }}
+                </span>
+            </div>
         </td>
     </tr>
 
@@ -35,34 +42,45 @@
     <tr>
         <th>出勤・退勤</th>
         <td>
-            {{ \Carbon\Carbon::parse($request->requested_work_start_datetime)->format('H:i') }}
-            ～
-            {{ \Carbon\Carbon::parse($request->requested_work_end_datetime)->format('H:i') }}
+            <div class="time-range">
+                <span>{{ \Carbon\Carbon::parse($request->requested_work_start_datetime)->format('H:i') }}</span>
+                <span class="tilde">〜</span>
+                <span>{{ \Carbon\Carbon::parse($request->requested_work_end_datetime)->format('H:i') }}</span>
+            </div>
         </td>
     </tr>
 
     @php
-        $breakCount = count($request->breaks);
+        $breaks = $request->breaks;
     @endphp
-    {{-- 休憩 --}}
-    @foreach($request->breaks as $index => $break)
-    <tr>
-        <th>休憩{{ $index + 1 }}</th>
-        <td>
-            {{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}
-            ～
-            {{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}
-        </td>
-    </tr>
-    @endforeach
 
-    <tr>
-    <th>休憩{{ $breakCount + 1 }}</th>
-    <td>
-        {{-- 空表示 or ハイフン --}}
-        
-    </td>
-</tr>
+    {{-- 休憩がある場合 --}}
+    @if($breaks->isNotEmpty())
+
+        @foreach($breaks as $index => $break)
+        <tr>
+            <th>休憩{{ $index + 1 }}</th>
+            <td>
+                <div class="time-range">
+                    <span>{{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}</span>
+                    <span class="tilde">〜</span>
+                    <span>{{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}</span>
+                </div>
+            </td>
+        </tr>
+        @endforeach
+
+    {{-- 休憩がない場合 --}}
+    @else
+
+        <tr>
+            <th>休憩1</th>
+            <td>
+                {{-- 空 or ハイフン --}}
+            </td>
+        </tr>
+
+    @endif
     {{-- 備考 --}}
     <tr>
         <th>備考</th>

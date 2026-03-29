@@ -10,8 +10,18 @@
 
 <h2 class="page-title">勤怠詳細</h2>
 
-<form method="POST" action="{{ route('admin.attendance.update', $attendance->id) }}">
-    @csrf
+@if($attendance->id)
+    {{-- 更新 --}}
+    <form method="POST" action="{{ route('admin.attendance.update', $attendance->id) }}">
+@else
+    {{-- 新規作成 --}}
+    <form method="POST" action="{{ route('admin.attendance.store') }}">
+@endif
+
+@csrf
+
+<input type="hidden" name="user_id" value="{{ $attendance->user_id }}">
+<input type="hidden" name="work_date" value="{{ $attendance->work_date }}">
 
     <table class="detail-table">
 
@@ -25,7 +35,14 @@
     <tr>
         <th>日付</th>
         <td>
-            {{ \Carbon\Carbon::parse($attendance->work_date)->format('Y年n月j日') }}
+            <div class="date-row">
+                <span class="year">
+                {{ \Carbon\Carbon::parse($attendance->work_date)->format('Y年') }}
+                </span>
+                <span class="month-day">
+                {{ \Carbon\Carbon::parse($attendance->work_date)->format('n月j日') }}
+                </span>
+            </div>
         </td>
     </tr>
 
@@ -35,43 +52,92 @@
         <td>
             <div class="time-group">
                 <input type="time" name="work_start_datetime"
-                    value="{{ old('work_start_datetime', \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i')) }}">
+                    value="{{ old('work_start_datetime',
+                        $attendance->work_start_datetime
+                            ? \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i')
+                            : ''
+                    ) }}">
 
                 <span>～</span>
 
                 <input type="time" name="work_end_datetime"
-                    value="{{ old('work_end_datetime', \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i')) }}">
+                    value="{{ old('work_end_datetime',
+                        $attendance->work_end_datetime
+                            ? \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i')
+                            : ''
+                    ) }}">
             </div>
+
+            @error('work_start_datetime')
+                <p class="error">{{ $message }}</p>
+            @enderror
+
+            @error('work_end_datetime')
+                <p class="error">{{ $message }}</p>
+            @enderror
         </td>
     </tr>
-
     {{-- 休憩 --}}
     @foreach($attendance->breakTimes as $index => $break)
     <tr>
         <th>休憩{{ $index + 1 }}</th>
         <td>
             <div class="time-group">
+
                 <input type="time" name="break_start[]"
-                    value="{{ old("break_start.$index", \Carbon\Carbon::parse($break->break_start)->format('H:i')) }}">
+                    value="{{ old("break_start.$index",
+                        $break->break_start
+                            ? \Carbon\Carbon::parse($break->break_start)->format('H:i')
+                            : ''
+                    ) }}">
 
                 <span>～</span>
 
                 <input type="time" name="break_end[]"
-                    value="{{ old("break_end.$index", $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '') }}">
+                    value="{{ old("break_end.$index",
+                        $break->break_end
+                            ? \Carbon\Carbon::parse($break->break_end)->format('H:i')
+                            : ''
+                    ) }}">
+
             </div>
+
+            @error("break_start.$index")
+                <p class="error">{{ $message }}</p>
+            @enderror
+
+            @error("break_end.$index")
+                <p class="error">{{ $message }}</p>
+            @enderror
         </td>
     </tr>
     @endforeach
 
     {{-- 休憩追加 --}}
+    @php
+    $nextIndex = count($attendance->breakTimes);
+    @endphp
+
     <tr>
-        <th>休憩{{ count($attendance->breakTimes) + 1 }}</th>
+        <th>休憩{{ $nextIndex + 1 }}</th>
         <td>
             <div class="time-group">
-                <input type="time" name="break_start[]">
+                <input type="time" name="break_start[]"
+                    value="{{ old("break_start.$nextIndex") }}">
+
                 <span>～</span>
-                <input type="time" name="break_end[]">
+
+                <input type="time" name="break_end[]"
+                    value="{{ old("break_end.$nextIndex") }}">
             </div>
+
+            @error("break_start.$nextIndex")
+                <p class="error">{{ $message }}</p>
+            @enderror
+
+            @error("break_end.$nextIndex")
+                <p class="error">{{ $message }}</p>
+            @enderror
         </td>
     </tr>
 
@@ -79,7 +145,10 @@
     <tr>
         <th>備考</th>
         <td>
-            <textarea name="note">{{ old('note', $attendance->note) }}</textarea>
+            <textarea name="note" class="note-area">{{ old('note', $attendance->note) }}</textarea>
+            @error('note')
+                <p class="error">{{ $message }}</p>
+            @enderror
         </td>
     </tr>
 

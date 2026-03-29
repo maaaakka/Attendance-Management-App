@@ -280,3 +280,13 @@ input[type="time"]{
     background-color: gray;
     cursor: not-allowed;
 }
+
+.time-range {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.time-range .tilde {
+    margin: 0 10px;
+}

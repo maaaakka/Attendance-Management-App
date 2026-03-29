@@ -46,29 +46,25 @@
 @foreach($users as $user)
 
 @php
-$attendance = $user->attendances->first();
+    $attendance = $attendances[$user->id] ?? null;
 @endphp
 
 <tr>
 
-<!-- 名前 -->
 <td>{{ $user->name }}</td>
 
-<!-- 出勤 -->
 <td>
 {{ $attendance?->work_start_datetime 
     ? \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i') 
     : '' }}
 </td>
 
-<!-- 退勤 -->
 <td>
 {{ $attendance?->work_end_datetime 
     ? \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i') 
     : '' }}
 </td>
 
-<!-- 休憩 -->
 <td>
 @php
 $breakTotal = 0;
@@ -85,7 +81,6 @@ if ($attendance) {
 {{ $breakTotal ? gmdate('H:i', floor($breakTotal / 60) * 60) : '' }}
 </td>
 
-<!-- 合計 -->
 <td>
 @php
 $workTotal = 0;
@@ -100,13 +95,14 @@ if ($attendance && $attendance->work_end_datetime) {
 {{ $workTotal ? gmdate('H:i', floor($workTotal / 60) * 60) : '' }}
 </td>
 
-<!-- 詳細 -->
+@php
+    $detailUrl = $attendance
+        ? url('/admin/attendance/' . $attendance->id)
+        : url('/admin/attendance/' . $user->id . '?date=' . $date->format('Y-m-d'));
+@endphp
+
 <td>
-@if($attendance)
-<a href="{{ url('/admin/attendance/' . $attendance->id) }}">
-詳細
-</a>
-@endif
+    <a href="{{ $detailUrl }}">詳細</a>
 </td>
 
 </tr>

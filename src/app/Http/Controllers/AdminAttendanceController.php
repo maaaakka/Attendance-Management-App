@@ -4,104 +4,182 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Attendance;
-use App\Models\CorrectionRequestAttendance;
+use App\Models\CorrectionRequestAttendance as CorrectionAttendance;;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Requests\AttendanceRequest;
+use App\Http\Requests\CorrectionRequestAttendance;
 
 class AdminAttendanceController extends Controller
 {
+    // 一覧
     public function list(Request $request)
     {
-        
         // 日付取得（なければ今日）
         $date = $request->input('date')
             ? Carbon::parse($request->date)
             : Carbon::today();
 
-        // 全ユーザー取得
-        $users = User::with(['attendances' => function ($query) use ($date) {
-            $query->whereDate('work_date', $date)
-                ->with('breakTimes');
-        }])->get();
+        // 全ユーザー
+        $users = User::all();
 
-        return view('admin.attendance.list', compact('users', 'date'));
+        // ★ その日の勤怠を user_id でまとめる
+        $attendances = Attendance::whereDate('work_date', $date)
+            ->with('breakTimes')
+            ->get()
+            ->keyBy('user_id');
+
+        return view('admin.attendance.list', compact(
+            'users',
+            'date',
+            'attendances'
+        ));
     }
 
-    public function detail($id)
-    {
-        $attendance = Attendance::with(['user', 'breakTimes'])->findOrFail($id);
+public function detail(Request $request, $id)
+{
+    $date = $request->date;
 
-        // 承認待ち申請
-        $pendingRequest = CorrectionRequestAttendance::where('attendance_id', $id)
-            ->where('status', CorrectionRequestAttendance::STATUS_PENDING)
+    // =========================
+    // ★ dateがある → user_idとして扱う
+    // =========================
+    if ($date) {
+
+        $attendance = Attendance::with(['user', 'breakTimes'])
+            ->where('user_id', $id)
+            ->whereDate('work_date', $date)
             ->first();
 
-        return view('admin.attendance.detail', compact('attendance', 'pendingRequest'));
-    }
+        // なければ空データ
+        if (!$attendance) {
+            $attendance = new Attendance();
+            $attendance->user_id = $id;
+            $attendance->work_date = $date;
+            $attendance->breakTimes = collect();
 
-    public function update(Request $request, $id)
-    {
-        $attendance = Attendance::with('breakTimes')->findOrFail($id);
-
-        // バリデーション
-        $request->validate([
-            'work_start_datetime' => ['required'],
-            'work_end_datetime' => ['required'],
-            'note' => ['required'],
-        ], [
-            'work_start_datetime.required' => '出勤時間を入力してください',
-            'work_end_datetime.required' => '退勤時間を入力してください',
-            'note.required' => '備考を記入してください',
-        ]);
-
-        // ❗ 時間チェック
-        if ($request->work_start_datetime >= $request->work_end_datetime) {
-            return back()->withErrors([
-                'work_start_datetime' => '出勤時間もしくは退勤時間が不適切な値です'
-            ]);
+            $attendance->setRelation('user', User::find($id));
         }
 
-        // 更新
-        $attendance->update([
-            'work_start_datetime' => $attendance->work_date . ' ' . $request->work_start_datetime,
-            'work_end_datetime' => $attendance->work_date . ' ' . $request->work_end_datetime,
-            'note' => $request->note,
+        return view('admin.attendance.detail', [
+            'attendance' => $attendance,
+            'pendingRequest' => null
         ]);
+    }
 
-        // 休憩更新
-        $existingBreaks = $attendance->breakTimes;
+    // =========================
+    // ★ dateなし → attendance_id
+    // =========================
+    $attendance = Attendance::with(['user', 'breakTimes'])->findOrFail($id);
 
+    return view('admin.attendance.detail', [
+        'attendance' => $attendance,
+        'pendingRequest' => null
+    ]);
+}
+
+    public function update(CorrectionRequestAttendance $request, $id)
+{
+    $date = $request->query('date');
+
+    // =========================
+    // ① 勤怠取得（or 新規作成）
+    // =========================
+    if ($date) {
+        // user_idとして扱う
+        $attendance = Attendance::where('user_id', $id)
+            ->whereDate('work_date', $date)
+            ->first();
+
+        if (!$attendance) {
+            $attendance = Attendance::create([
+                'user_id' => $id,
+                'work_date' => $date,
+            ]);
+        }
+    } else {
+        // attendance_idとして扱う
+        $attendance = Attendance::findOrFail($id);
+        $date = $attendance->work_date;
+    }
+
+    // =========================
+    // ② 勤怠更新
+    // =========================
+    $attendance->update([
+        'work_start_datetime' => $date . ' ' . $request->work_start_datetime,
+        'work_end_datetime' => $date . ' ' . $request->work_end_datetime,
+        'note' => $request->note,
+    ]);
+
+    // =========================
+    // ③ 休憩更新
+    // =========================
+    $existingBreaks = $attendance->breakTimes;
+
+    foreach ($request->break_start as $index => $start) {
+
+        $end = $request->break_end[$index] ?? null;
+
+        // 🔥 空はスキップ（←重要）
+        if (empty($start) && empty($end)) {
+            continue;
+        }
+
+        // 🔥 片方だけ入力はエラー
+        if (($start && !$end) || (!$start && $end)) {
+            return back()->withErrors([
+                "break_start.$index" => '休憩開始時間と終了時間を入力してください'
+            ])->withInput();
+        }
+
+        if (isset($existingBreaks[$index])) {
+            $existingBreaks[$index]->update([
+                'break_start' => $date . ' ' . $start,
+                'break_end' => $date . ' ' . $end,
+            ]);
+        } else {
+            $attendance->breakTimes()->create([
+                'break_start' => $date . ' ' . $start,
+                'break_end' => $date . ' ' . $end,
+            ]);
+        }
+    }
+
+    return back()->with('success', '勤怠を更新しました');
+}
+
+public function store(CorrectionRequestAttendance $request)
+{
+    $attendance = Attendance::create([
+        'user_id' => $request->user_id,
+        'work_date' => $request->work_date,
+        'work_start_datetime' => $request->work_date . ' ' . $request->work_start_datetime,
+        'work_end_datetime' => $request->work_date . ' ' . $request->work_end_datetime,
+        'note' => $request->note,
+    ]);
+
+    // 休憩
+    if ($request->break_start) {
         foreach ($request->break_start as $index => $start) {
 
             $end = $request->break_end[$index] ?? null;
 
-            // ❗休憩バリデーション
-            if ($start && ($start < $request->work_start_datetime || $start > $request->work_end_datetime)) {
+            if (empty($start) && empty($end)) continue;
+
+            if (($start && !$end) || (!$start && $end)) {
                 return back()->withErrors([
-                    'break_start' => '休憩時間が不適切な値です'
-                ]);
+                    "break_start.$index" => '休憩開始時間と終了時間を入力してください'
+                ])->withInput();
             }
 
-            if ($end && $end > $request->work_end_datetime) {
-                return back()->withErrors([
-                    'break_end' => '休憩時間もしくは退勤時間が不適切な値です'
-                ]);
-            }
-
-            if (isset($existingBreaks[$index])) {
-                $existingBreaks[$index]->update([
-                    'break_start' => $attendance->work_date . ' ' . $start,
-                    'break_end' => $end ? $attendance->work_date . ' ' . $end : null,
-                ]);
-            } else {
-                $attendance->breakTimes()->create([
-                    'break_start' => $attendance->work_date . ' ' . $start,
-                    'break_end' => $end ? $attendance->work_date . ' ' . $end : null,
-                ]);
-            }
+            $attendance->breakTimes()->create([
+                'break_start' => $request->work_date . ' ' . $start,
+                'break_end' => $end ? $request->work_date . ' ' . $end : null,
+            ]);
         }
-
-        return back();
     }
+
+    return back();
+}
+
+
 }

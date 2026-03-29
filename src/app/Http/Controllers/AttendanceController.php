@@ -11,7 +11,6 @@ use App\Models\BreakTime;
 use App\Models\CorrectionRequestAttendance as CorrectionAttendance;
 use App\Models\CorrectionRequestBreak;
 
-use App\Http\Requests\AttendanceRequest;
 use App\Http\Requests\CorrectionRequestAttendance;
 
 class AttendanceController extends Controller
