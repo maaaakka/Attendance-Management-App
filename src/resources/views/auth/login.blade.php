@@ -12,7 +12,7 @@
 
 <div class="auth-card">
 
-<h2 class="auth-title">ログイン</h2>
+<h1 class="auth-title">ログイン</h1>
 
 <form method="POST" action="/login">
 @csrf

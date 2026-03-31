@@ -8,7 +8,7 @@
 
 <div class="attendance-list">
 
-<h2 class="page-title">勤怠一覧</h2>
+<h1 class="page-title">勤怠一覧</h1>
 
 <div class="month-nav">
 
@@ -41,7 +41,6 @@
 </thead>
 
 <tbody>
-
 @foreach($dates as $date)
 
 @php

@@ -8,7 +8,7 @@
 
 <div class="attendance-detail">
 
-<h2 class="page-title">勤怠詳細</h2>
+<h1 class="page-title">勤怠詳細</h1>
 
 <form method="POST" action="{{ route('stamp_correction_request.approve.update', $request->id) }}">
     @csrf

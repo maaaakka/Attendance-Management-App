@@ -8,7 +8,7 @@
 
 <div class="request-list">
 
-<h2 class="page-title">申請一覧</h2>
+<h1 class="page-title">申請一覧</h1>
 
 <div class="tab-menu">
     <a href="?status=pending" class="{{ request('status') !== 'approved' ? 'active' : '' }}">

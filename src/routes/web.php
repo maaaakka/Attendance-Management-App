@@ -6,7 +6,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\StampCorrectionRequestController;
 use App\Http\Controllers\AdminAttendanceController;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\AdminStaffController;
 
 
 
@@ -112,4 +112,14 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::post('/stamp_correction_request/approve/{id}', [StampCorrectionRequestController::class, 'approveUpdate'])
         ->name('stamp_correction_request.approve.update');
+
+    // スタッフ一覧
+    Route::get('/admin/staff/list', [AdminStaffController::class, 'index']);
+
+    // スタッフ別月次一覧
+    Route::get('/admin/attendance/staff/{id}', [AdminStaffController::class, 'attendanceList']);
+
+    // スタッフ別月次一覧CSV
+    Route::get('/admin/attendance/staff/{id}/csv', [AdminStaffController::class, 'exportCsv'])
+    ->name('admin.attendance.staff.csv');
 });

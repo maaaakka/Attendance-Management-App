@@ -160,6 +160,7 @@ body{
 .page-title {
     margin-bottom: 30px;
 }
+
 .attendance-detail {
     width: 700px;
     margin: 40px auto;
@@ -289,4 +290,39 @@ input[type="time"]{
 
 .time-range .tilde {
     margin: 0 10px;
+}
+
+.staff-table {
+    margin-top: 60px;
+}
+
+.staff-list .attendance-table th:nth-child(1),
+.staff-list .attendance-table td:nth-child(1) {
+    width: 25%;
+    text-align: center;
+}
+
+.staff-list .attendance-table th:nth-child(2),
+.staff-list .attendance-table td:nth-child(2) {
+    width: 50%;
+    text-align: center;
+}
+
+.staff-list .attendance-table th:nth-child(3),
+.staff-list .attendance-table td:nth-child(3) {
+    width: 25%;
+    text-align: center;
+}
+
+.csv-btn {
+    display: inline-block;
+    width: auto;
+    background: black;
+    color: white;
+    font-weight: bold;
+    padding: 8px 35px;
+    border: none;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    text-decoration: none;
 }

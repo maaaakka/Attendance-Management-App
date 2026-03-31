@@ -40,7 +40,7 @@ public function detail(Request $request, $id)
     $date = $request->date;
 
     // =========================
-    // ★ dateがある → user_idとして扱う
+    // ★ dateあり → user_id扱い（絶対こっち）
     // =========================
     if ($date) {
 
@@ -52,6 +52,7 @@ public function detail(Request $request, $id)
         // なければ空データ
         if (!$attendance) {
             $attendance = new Attendance();
+            $attendance->id = null;
             $attendance->user_id = $id;
             $attendance->work_date = $date;
             $attendance->breakTimes = collect();
@@ -66,7 +67,7 @@ public function detail(Request $request, $id)
     }
 
     // =========================
-    // ★ dateなし → attendance_id
+    // ★ dateなし → attendance_id扱い
     // =========================
     $attendance = Attendance::with(['user', 'breakTimes'])->findOrFail($id);
 

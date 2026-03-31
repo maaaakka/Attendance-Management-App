@@ -8,7 +8,7 @@
 
 <div class="attendance-detail">
 
-<h2 class="page-title">勤怠詳細</h2>
+<h1 class="page-title">勤怠詳細</h1>
 
 @if($attendance->id)
     {{-- 更新 --}}
