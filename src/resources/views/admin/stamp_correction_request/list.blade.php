@@ -55,9 +55,9 @@
 </td>
 
 <td>
-<a href="/stamp_correction_request/approve/{{ $request->id }}">
-詳細
-</a>
+    <a href="/stamp_correction_request/approve/{{ $request->id }}">
+    詳細
+    </a>
 </td>
 
 </tr>
@@ -85,9 +85,9 @@
 </td>
 
 <td>
-<a href="/stamp_correction_request/approve/{{ $request->id }}">
-詳細
-</a>
+    <a href="/stamp_correction_request/approve/{{ $request->id }}">
+    詳細
+    </a>
 </td>
 
 </tr>
@@ -99,6 +99,13 @@
 </tbody>
 
 </table>
+<div class="pagination">
+    @if(request('status') === 'approved')
+        {{ $approvedRequests->appends(['status' => 'approved'])->links() }}
+    @else
+        {{ $pendingRequests->appends(['status' => 'pending'])->links() }}
+    @endif
+</div>
 
 </div>
 

@@ -55,8 +55,7 @@
                     value="{{ old('work_start_datetime',
                         $attendance->work_start_datetime
                             ? \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i')
-                            : ''
-                    ) }}">
+                            : '') }}" {{ $pendingRequest ? 'disabled' : '' }}>
 
                 <span>～</span>
 
@@ -64,8 +63,7 @@
                     value="{{ old('work_end_datetime',
                         $attendance->work_end_datetime
                             ? \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i')
-                            : ''
-                    ) }}">
+                            : '') }}" {{ $pendingRequest ? 'disabled' : '' }}>
             </div>
 
             @error('work_start_datetime')
@@ -88,8 +86,7 @@
                     value="{{ old("break_start.$index",
                         $break->break_start
                             ? \Carbon\Carbon::parse($break->break_start)->format('H:i')
-                            : ''
-                    ) }}">
+                            : '') }}" {{ $pendingRequest ? 'disabled' : '' }}>
 
                 <span>～</span>
 
@@ -97,8 +94,8 @@
                     value="{{ old("break_end.$index",
                         $break->break_end
                             ? \Carbon\Carbon::parse($break->break_end)->format('H:i')
-                            : ''
-                    ) }}">
+                            : '') }}"
+                            {{ $pendingRequest ? 'disabled' : '' }}>
 
             </div>
 
@@ -123,12 +120,14 @@
         <td>
             <div class="time-group">
                 <input type="time" name="break_start[]"
-                    value="{{ old("break_start.$nextIndex") }}">
+                    value="{{ old("break_start.$nextIndex") }}"
+                    {{ $pendingRequest ? 'disabled' : '' }}>
 
                 <span>～</span>
 
                 <input type="time" name="break_end[]"
-                    value="{{ old("break_end.$nextIndex") }}">
+                    value="{{ old("break_end.$nextIndex") }}"
+                    {{ $pendingRequest ? 'disabled' : '' }}>
             </div>
 
             @error("break_start.$nextIndex")
@@ -145,21 +144,47 @@
     <tr>
         <th>備考</th>
         <td>
-            <textarea name="note" class="note-area">{{ old('note', $attendance->note) }}</textarea>
+
+        @if($pendingRequest)
+
+            {{-- 申請中 → 編集不可 --}}
+            <textarea name="note" class="note-area" {{ $pendingRequest ? 'disabled' : '' }}>
+                {{ old('note', $attendance->note) }}
+            </textarea>
+
+        @else
+
+            {{-- 通常 → 編集可能 --}}
+            <textarea name="note" class="note-area">
+                {{ old('note', $attendance->note) }}
+            </textarea>
+
             @error('note')
                 <p class="error">{{ $message }}</p>
             @enderror
+
+        @endif
+
         </td>
     </tr>
 
     </table>
 
-    <div class="btn-area">
-        <button type="submit" class="btn-edit">
-            修正
-        </button>
-    </div>
+    {{-- 修正ボタン --}}
+    @if(!$pendingRequest)
+        <div class="btn-area">
+            <button type="submit" class="btn-edit">
+                修正
+            </button>
+        </div>
+    @endif
 
+    {{-- 申請中メッセージ --}}
+    @if($pendingRequest)
+        <p class="pending-message">
+            ※修正申請中のため修正はできません。
+        </p>
+    @endif
 </form>
 
 </div>

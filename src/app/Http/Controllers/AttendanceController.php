@@ -23,12 +23,7 @@ class AttendanceController extends Controller
             ->whereDate('work_date', today())
             ->first();
 
-        if ($attendance) {
-            $status = $attendance->status;
-        } else {
-            //  修正
-            $status = Attendance::STATUS_OFF_WORK;
-        }
+        $status = $attendance?->status ?? Attendance::STATUS_OFF_WORK;
 
         return view('attendance.index', compact('user', 'status'));
     }
@@ -39,11 +34,13 @@ class AttendanceController extends Controller
     {
         $user = Auth::user();
 
-        Attendance::create([
+        $attendance = Attendance::firstOrCreate(
+        [
             'user_id' => $user->id,
             'work_date' => Carbon::today(),
+        ],
+        [
             'work_start_datetime' => Carbon::now(),
-            'status' => Attendance::STATUS_WORKING //  修正
         ]);
 
         return redirect()->route('attendance.index');
@@ -59,14 +56,25 @@ class AttendanceController extends Controller
             ->whereDate('work_date', today())
             ->first();
 
+        if (!$attendance) {
+            return redirect()->route('attendance.index')
+                ->with('error', '先に出勤してください');
+        }
+
+        $activeBreak = BreakTime::where('attendance_id', $attendance->id)
+            ->whereNull('break_end')
+            ->exists();
+
+        if ($activeBreak) {
+            return back()->with('error', 'すでに休憩中です');
+        }
+
         BreakTime::create([
             'attendance_id' => $attendance->id,
             'break_start' => Carbon::now()
         ]);
 
-        $attendance->update([
-            'status' => Attendance::STATUS_ON_BREAK //  修正
-        ]);
+        $attendance->save();
 
         return redirect()->route('attendance.index');
     }
@@ -90,9 +98,7 @@ class AttendanceController extends Controller
             'break_end' => Carbon::now()
         ]);
 
-        $attendance->update([
-            'status' => Attendance::STATUS_WORKING //  修正
-        ]);
+        $attendance->save();
 
         return redirect()->route('attendance.index');
     }
@@ -107,10 +113,8 @@ class AttendanceController extends Controller
             ->whereDate('work_date', today())
             ->first();
 
-        $attendance->update([
-            'work_end_datetime' => Carbon::now(),
-            'status' => Attendance::STATUS_LEFT //  修正
-        ]);
+        $attendance->work_end_datetime = Carbon::now();
+        $attendance->save();
 
         return redirect()->route('attendance.index');
     }
@@ -145,66 +149,66 @@ class AttendanceController extends Controller
 
     // 詳細
     public function detail($id)
-{
-    // 数値かどうか判定
-    if (is_numeric($id)) {
-        $attendance = Attendance::with('breakTimes','user')->find($id);
-    } else {
-        // 日付として取得
-        $attendance = Attendance::with('breakTimes','user')
-            ->where('user_id', Auth::id())
-            ->whereDate('work_date', $id)
-            ->first();
+    {
+        // 数値かどうか判定
+        if (is_numeric($id)) {
+            $attendance = Attendance::with('breakTimes','user')->find($id);
+        } else {
+            // 日付として取得
+            $attendance = Attendance::with('breakTimes','user')
+                ->where('user_id', Auth::id())
+                ->whereDate('work_date', $id)
+                ->first();
+        }
+
+        // データなし
+        if (!$attendance) {
+            $attendance = new Attendance();
+            $attendance->id = null;
+            $attendance->user_id = Auth::id();
+            $attendance->work_date = $id;
+            $attendance->breakTimes = collect();
+        }
+
+        $pendingRequest = null;
+
+        if ($attendance->id) {
+            $pendingRequest = CorrectionAttendance::where('attendance_id',$attendance->id)
+                ->where('status','pending')
+                ->first();
+
+            if ($pendingRequest) {
+            $pendingRequest->load('breaks');}
+        }
+
+        return view('attendance.detail', compact(
+            'attendance',
+            'pendingRequest'
+        ));
     }
-
-    // データなし
-    if (!$attendance) {
-        $attendance = new Attendance();
-        $attendance->id = null;
-        $attendance->user_id = Auth::id();
-        $attendance->work_date = $id;
-        $attendance->breakTimes = collect();
-    }
-
-    $pendingRequest = null;
-
-    if ($attendance->id) {
-        $pendingRequest = CorrectionAttendance::where('attendance_id',$attendance->id)
-            ->where('status','pending')
-            ->first();
-
-        if ($pendingRequest) {
-        $pendingRequest->load('breaks');}
-    }
-
-    return view('attendance.detail', compact(
-        'attendance',
-        'pendingRequest'
-    ));
-}
 
     public function detailByDate($date)
-{
-    $attendance = Attendance::with('breakTimes','user')
-        ->where('user_id', Auth::id())
-        ->whereDate('work_date', $date)
-        ->first();
+    {
+        $attendance = Attendance::with('breakTimes','user')
+            ->where('user_id', Auth::id())
+            ->whereDate('work_date', $date)
+            ->first();
 
-    if (!$attendance) {
-        $attendance = new Attendance();
-        $attendance->id = null;
-        $attendance->user_id = Auth::id();
-        $attendance->work_date = $date;
-        $attendance->breakTimes = collect();
+        if (!$attendance) {
+            $attendance = new Attendance();
+            $attendance->id = null;
+            $attendance->user_id = Auth::id();
+            $attendance->work_date = $date;
+            $attendance->breakTimes = collect();
+        }
+
+        $pendingRequest = null;
+
+        return view('attendance.detail', compact(
+            'attendance',
+            'pendingRequest'
+        ));
     }
-
-    $pendingRequest = null;
-
-    return view('attendance.detail', compact(
-        'attendance',
-        'pendingRequest'
-    ));
-}
 
     // 修正申請
     public function requestCorrection(CorrectionRequestAttendance $request, $id)
@@ -222,7 +226,7 @@ class AttendanceController extends Controller
             if (!$attendance) {
                 $attendance = Attendance::create([
                     'user_id' => auth()->id(),
-                    'work_date' => $request->work_date
+                    'work_date' => $request->work_date,
                 ]);
             }
         }
@@ -248,7 +252,6 @@ class AttendanceController extends Controller
             'status' => CorrectionAttendance::STATUS_PENDING
 
         ]);
-
 
         // 休憩修正申請
         if ($request->break_start) {
@@ -284,6 +287,4 @@ class AttendanceController extends Controller
             ->route('stamp_correction_request.list')
             ->with('success', '修正申請を送信しました');
     }
-
-
 }

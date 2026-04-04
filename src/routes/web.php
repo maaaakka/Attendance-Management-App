@@ -21,15 +21,16 @@ use App\Http\Controllers\AdminStaffController;
 |
 */
 
-Route::get('/stamp_correction_request/list',[StampCorrectionRequestController::class,'list']
+    Route::get('/stamp_correction_request/list',[StampCorrectionRequestController::class,'list']
         )->name('stamp_correction_request.list');
 
-// 一般ユーザー
-Route::get('/', function () {
-    return redirect('/login');
-});
+    // 一般ユーザー
+    Route::get('/', function () {
+        return redirect('/login');
+    });
 
-Route::middleware(['auth','verified'])->group(function () {
+    Route::middleware(['auth','verified'])->group(function () {
+
     // 出勤前
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
 
@@ -72,31 +73,33 @@ Route::middleware(['auth','verified'])->group(function () {
 });
 
 
-// 管理者ログイン画面
-Route::get('/admin/login', function () {
-    return view('admin.login');
-});
+    // 管理者ログイン画面
+    Route::get('/admin/login', function () {
+        return view('admin.login');
+    });
 
-// 管理者ログイン処理
-Route::post('/admin/login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store']);
+    // 管理者ログイン処理
+    Route::post('/admin/login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store']);
 
-// ログアウト
-Route::post('/admin/logout', function (Illuminate\Http\Request $request) {
-    Auth::guard('admin')->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    return redirect('/admin/login');
-})->name('admin.logout');
+    // ログアウト
+    Route::post('/admin/logout', function (Illuminate\Http\Request $request) {
+        Auth::guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/admin/login');
+    })->name('admin.logout');
 
 
-// 管理者専用
-Route::middleware('auth:admin')->group(function () {
+    // 管理者専用
+    Route::middleware('auth:admin')->group(function () {
 
     // 勤怠一覧
-    Route::get('/admin/attendance/list', [AdminAttendanceController::class, 'list']);
+    Route::get('/admin/attendance/list', [AdminAttendanceController::class, 'list'])
+        ->name('admin.attendance.list');
 
     // 詳細
-    Route::get('/admin/attendance/{id}', [AdminAttendanceController::class, 'detail']);
+    Route::get('/admin/attendance/{id}', [AdminAttendanceController::class, 'detail'])
+        ->name('admin.attendance.detail');
 
     // 更新
     Route::post('/admin/attendance/{id}', [AdminAttendanceController::class, 'update'])
@@ -114,10 +117,12 @@ Route::middleware('auth:admin')->group(function () {
         ->name('stamp_correction_request.approve.update');
 
     // スタッフ一覧
-    Route::get('/admin/staff/list', [AdminStaffController::class, 'index']);
+    Route::get('/admin/staff/list', [AdminStaffController::class, 'index'])
+        ->name('admin.staff.list');
 
     // スタッフ別月次一覧
-    Route::get('/admin/attendance/staff/{id}', [AdminStaffController::class, 'attendanceList']);
+    Route::get('/admin/attendance/staff/{id}', [AdminStaffController::class, 'attendanceList'])
+        ->name('admin.attendance.staff');
 
     // スタッフ別月次一覧CSV
     Route::get('/admin/attendance/staff/{id}/csv', [AdminStaffController::class, 'exportCsv'])

@@ -100,6 +100,14 @@
 
 </table>
 
+<div class="pagination">
+    @if(request('status') === 'approved')
+        {{ $approvedRequests->appends(['status' => 'approved'])->links() }}
+    @else
+        {{ $pendingRequests->appends(['status' => 'pending'])->links() }}
+    @endif
+</div>
+
 </div>
 
 @endsection

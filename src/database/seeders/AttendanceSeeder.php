@@ -24,11 +24,11 @@ class AttendanceSeeder extends Seeder
                     'user_id' => $user->id,
                     'work_date' => $date,
 
-                    // ⭐ 全員固定
+                    // 全員固定
                     'work_start_datetime' => $date->copy()->setTime(9, 0),
                     'work_end_datetime' => $date->copy()->setTime(18, 0),
 
-                    // ⭐ 退勤済
+                    // 退勤済
                     'status' => Attendance::STATUS_LEFT,
 
                 ]);

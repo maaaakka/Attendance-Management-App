@@ -48,6 +48,10 @@
 <main>
     @yield('content')
 </main>
-
+    @if(session('success'))
+        <div class="toast">
+            {{ session('success') }}
+        </div>
+    @endif
 </body>
 </html>

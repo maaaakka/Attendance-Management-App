@@ -77,105 +77,75 @@
     </tr>
 
     @php
-        $breaks = $pendingRequest ? $pendingRequest->breaks : $attendance->breakTimes;
-    @endphp
+    $breaks = $pendingRequest ? $pendingRequest->breaks : $attendance->breakTimes;
+@endphp
 
-    {{-- 休憩 --}}
-    @if($breaks->isEmpty())
+{{-- 休憩 --}}
+@foreach($breaks as $index => $break)
+<tr>
+    <th>休憩{{ $index + 1 }}</th>
+    <td>
 
-    <tr>
-        <th>休憩1</th>
-        <td>
+    @if($pendingRequest)
 
-        @if($pendingRequest)
-            {{-- 空表示 --}}
-        @else
-            <div class="time-group">
-                <input type="time" name="break_start[]" value="{{ old('break_start.0') }}">
-                <span class="time-sep">～</span>
-                <input type="time" name="break_end[]" value="{{ old('break_end.0') }}">
-            </div>
-
-            @error("break_start.0")
-                <p class="error">{{ $message }}</p>
-            @enderror
-
-            @error("break_end.0")
-                <p class="error">{{ $message }}</p>
-            @enderror
-        @endif
-
-        </td>
-    </tr>
+        {{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}
+        ～
+        {{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}
 
     @else
 
-        @foreach($breaks as $index => $break)
-        <tr>
-            <th>休憩{{ $index+1 }}</th>
-            <td>
+        <div class="time-group">
+            <input type="time" name="break_start[]"
+                value="{{ old("break_start.$index", \Carbon\Carbon::parse($break->break_start)->format('H:i')) }}">
 
-            @if($pendingRequest)
+            <span class="time-sep">～</span>
 
-                {{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}
-                ～
-                {{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}
+            <input type="time" name="break_end[]"
+                value="{{ old("break_end.$index", $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '') }}">
+        </div>
 
-            @else
+        @error("break_start.$index")
+            <p class="error">{{ $message }}</p>
+        @enderror
 
-                <div class="time-group">
-                    <input type="time" name="break_start[]"
-                        value="{{ old("break_start.$index", \Carbon\Carbon::parse($break->break_start)->format('H:i')) }}">
-
-                    <span class="time-sep">～</span>
-
-                    <input type="time" name="break_end[]"
-                        value="{{ old("break_end.$index", $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '') }}">
-                </div>
-
-                @error("break_start.$index")
-                    <p class="error">{{ $message }}</p>
-                @enderror
-
-                @error("break_end.$index")
-                    <p class="error">{{ $message }}</p>
-                @enderror
-
-            @endif
-
-            </td>
-        </tr>
-        @endforeach
+        @error("break_end.$index")
+            <p class="error">{{ $message }}</p>
+        @enderror
 
     @endif
 
-    {{-- 休憩追加 --}}
-    @if(!$pendingRequest && $breaks->isNotEmpty())
-    @php
-        $nextIndex = count($breaks);
-    @endphp
+    </td>
+</tr>
+@endforeach
 
-    <tr>
-        <th>休憩{{ $nextIndex + 1 }}</th>
-        <td>
 
-            <div class="time-group">
-                <input type="time" name="break_start[]" value="{{ old("break_start.$nextIndex") }}">
-                <span class="time-sep">～</span>
-                <input type="time" name="break_end[]" value="{{ old("break_end.$nextIndex") }}">
-            </div>
+{{--  追加用（常に1行だけ） --}}
+@if(!$pendingRequest)
+@php
+    $nextIndex = count($breaks);
+@endphp
 
-            @error("break_start.$nextIndex")
-                <p class="error">{{ $message }}</p>
-            @enderror
+<tr>
+    <th>休憩{{ $nextIndex + 1 }}</th>
+    <td>
 
-            @error("break_end.$nextIndex")
-                <p class="error">{{ $message }}</p>
-            @enderror
+        <div class="time-group">
+            <input type="time" name="break_start[]" value="{{ old("break_start.$nextIndex") }}">
+            <span class="time-sep">～</span>
+            <input type="time" name="break_end[]" value="{{ old("break_end.$nextIndex") }}">
+        </div>
 
-        </td>
-    </tr>
-    @endif
+        @error("break_start.$nextIndex")
+            <p class="error">{{ $message }}</p>
+        @enderror
+
+        @error("break_end.$nextIndex")
+            <p class="error">{{ $message }}</p>
+        @enderror
+
+    </td>
+</tr>
+@endif
 
     {{-- 備考 --}}
     <tr>

@@ -38,4 +38,44 @@ class Attendance extends Model
     {
         return $this->hasMany(CorrectionRequestAttendance::class);
     }
+    public function updateStatus()
+    {
+        // 出勤してない
+        if (!$this->work_start_datetime) {
+            $this->status = self::STATUS_OFF_WORK;
+            return;
+        }
+
+        // 出勤済み・退勤してない
+        if ($this->work_start_datetime && !$this->work_end_datetime) {
+
+            // 休憩中チェック
+            $onBreak = $this->breakTimes()
+                ->whereNull('break_end')
+                ->exists();
+
+            if ($onBreak) {
+                $this->status = self::STATUS_ON_BREAK;
+                return;
+            }
+
+            $this->status = self::STATUS_WORKING;
+            return;
+        }
+
+        // 退勤済み
+        if ($this->work_end_datetime) {
+            $this->status = self::STATUS_LEFT;
+            return;
+        }
+    }
+
+    protected static function boot()
+{
+    parent::boot();
+
+    static::saving(function ($attendance) {
+        $attendance->updateStatus();
+    });
+}
 }

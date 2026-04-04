@@ -20,7 +20,7 @@ class CreateAttendancesTable extends Migration
             $table->dateTime('work_start_datetime')->nullable();
             $table->dateTime('work_end_datetime')->nullable();
             $table->text('note')->nullable();
-            $table->tinyInteger('status')->default(0);
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

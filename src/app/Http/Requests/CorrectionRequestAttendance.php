@@ -49,7 +49,7 @@ public function withValidator($validator)
         $start = $this->work_start_datetime;
         $end   = $this->work_end_datetime;
 
-        // ① 出退勤
+        // 出退勤
         if (!$start || !$end || $start >= $end) {
             $validator->errors()->add(
                 'work_start_datetime',
@@ -57,18 +57,26 @@ public function withValidator($validator)
             );
         }
 
-        // ②③ 休憩
+        // 休憩
         if (is_array($this->break_start)) {
             foreach ($this->break_start as $index => $bStart) {
 
                 $bEnd = $this->break_end[$index] ?? null;
 
-                // 🔥 両方空ならスルー（これが一番大事）
+                // 両方空ならスルー
                 if (!$bStart && !$bEnd) {
                     continue;
                 }
 
-                // ② 開始チェック（入力されている場合のみ）
+                 // 前後チェック
+                if ($bStart && $bEnd && $bStart >= $bEnd) {
+                    $validator->errors()->add(
+                        "break_start.$index",
+                        '休憩時間が不適切な値です'
+                    );
+                }
+
+                // 開始チェック（入力されている場合のみ）
                 if ($bStart && (
                     ($start && $bStart < $start) ||
                     ($end && $bStart > $end)
@@ -79,7 +87,7 @@ public function withValidator($validator)
                     );
                 }
 
-                // ③ 終了チェック（入力されている場合のみ）
+                // 終了チェック（入力されている場合のみ）
                 if ($bEnd && $end && $bEnd > $end) {
                     $validator->errors()->add(
                         "break_end.$index",

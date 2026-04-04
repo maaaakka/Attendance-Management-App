@@ -70,7 +70,7 @@ body{
 
 .attendance-list {
     width: 800px;
-    margin: 40px auto;
+    margin: 20px auto;
 }
 
 .page-title {
@@ -123,7 +123,7 @@ body{
 
 .attendance-table th {
     background: #fff;
-    padding: 10px;
+    padding: 8px;
     font-size: 13px;
     color: #666;
     border-bottom: 1px solid #ddd;
@@ -137,7 +137,7 @@ body{
 }
 
 .attendance-table td {
-    padding: 10px;
+    padding: 8px;
     text-align: center;
     border-bottom: 1px solid #eee;
     color: #555;
@@ -163,7 +163,7 @@ body{
 
 .attendance-detail {
     width: 700px;
-    margin: 40px auto;
+    margin: 20px auto;
 }
 
 .detail-table {
@@ -189,7 +189,7 @@ body{
 }
 
 .month-day {
-    margin-left: 90px;
+    margin-left: 80px;
 }
 
 .detail-table td {
@@ -228,15 +228,15 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 input[type="time"]{
     border: 1px solid #ddd;
-    padding: 6px 10px;
+    padding: 4px 8px;
     width: 90px;
     border-radius: 4px;
     font-size: 18px;
 }
 
 .note-area {
-    width: 60%;
-    height: 50px;
+    width: 50%;
+    height: 35px;
     padding: 10px;
 }
 
@@ -293,7 +293,7 @@ input[type="time"]{
 }
 
 .staff-table {
-    margin-top: 60px;
+    margin-top: 20px;
 }
 
 .staff-list .attendance-table th:nth-child(1),
@@ -325,4 +325,45 @@ input[type="time"]{
     font-size: 16px;
     letter-spacing: 0.2em;
     text-decoration: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination ul {
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.pagination li {
+    margin: 0 5px;
+}
+
+.pagination ul,
+.pagination li {
+    list-style: none;
+}
+
+.pagination a,
+.pagination span {
+    display: block;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.pagination li.active span {
+    background-color: #000;
+    color: #fff;
+}
+
+.pagination a:hover {
+    background-color: #f5f5f5;
 }

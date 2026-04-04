@@ -113,6 +113,12 @@ if ($attendance && $attendance->work_end_datetime) {
 
 </table>
 
+<div class="pagination">
+    {{ $users->links() }}
 </div>
+
+</div>
+
+
 
 @endsection
