@@ -254,34 +254,39 @@ class AttendanceController extends Controller
         ]);
 
         // 休憩修正申請
-        if ($request->break_start) {
+if ($request->break_start) {
 
-            foreach ($request->break_start as $index => $start) {
+    foreach ($request->break_start as $index => $start) {
 
-                if (!$start) {
-                    continue;
-                }
+        $end = $request->break_end[$index] ?? null;
 
-                $breakId = $attendance->breakTimes[$index]->id ?? null;
-
-                $breakEnd = $request->break_end[$index] ?? null;
-
-                $data = [
-                    'request_id' => $correction->id,
-                    'break_start' => $workDate . ' ' . $start,
-                    'break_end' => $breakEnd ? $workDate . ' ' . $breakEnd : null
-                ];
-
-                // 既存休憩がある場合のみ
-                if ($breakId) {
-                    $data['break_id'] = $breakId;
-                }
-
-                CorrectionRequestBreak::create($data);
-
-            }
-
+        // 🔥 両方空 → OK
+        if (!$start && !$end) {
+            continue;
         }
+
+        // 🔥 片方だけ → エラー
+        if (($start && !$end) || (!$start && $end)) {
+            return back()->withErrors([
+                "break_start.$index" => '休憩時間が不適切な値です'
+            ])->withInput();
+        }
+
+        $breakId = $attendance->breakTimes[$index]->id ?? null;
+
+        $data = [
+            'request_id' => $correction->id,
+            'break_start' => $workDate . ' ' . $start,
+            'break_end' => $workDate . ' ' . $end
+        ];
+
+        if ($breakId) {
+            $data['break_id'] = $breakId;
+        }
+
+        CorrectionRequestBreak::create($data);
+    }
+}
 
         return redirect()
             ->route('stamp_correction_request.list')

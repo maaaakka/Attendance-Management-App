@@ -50,12 +50,21 @@
     <tr>
         <th>出勤・退勤</th>
         <td>
+
+        @if($pendingRequest)
+
+            {{ \Carbon\Carbon::parse($pendingRequest->requested_work_start_datetime)->format('H:i') }}
+            ～
+            {{ \Carbon\Carbon::parse($pendingRequest->requested_work_end_datetime)->format('H:i') }}
+
+        @else
+
             <div class="time-group">
                 <input type="time" name="work_start_datetime"
                     value="{{ old('work_start_datetime',
                         $attendance->work_start_datetime
                             ? \Carbon\Carbon::parse($attendance->work_start_datetime)->format('H:i')
-                            : '') }}" {{ $pendingRequest ? 'disabled' : '' }}>
+                            : '') }}">
 
                 <span>～</span>
 
@@ -63,7 +72,7 @@
                     value="{{ old('work_end_datetime',
                         $attendance->work_end_datetime
                             ? \Carbon\Carbon::parse($attendance->work_end_datetime)->format('H:i')
-                            : '') }}" {{ $pendingRequest ? 'disabled' : '' }}>
+                            : '') }}">
             </div>
 
             @error('work_start_datetime')
@@ -73,61 +82,73 @@
             @error('work_end_datetime')
                 <p class="error">{{ $message }}</p>
             @enderror
+
+        @endif
+
         </td>
     </tr>
+
     {{-- 休憩 --}}
-    @foreach($attendance->breakTimes as $index => $break)
+    @php
+    $breaks = $pendingRequest ? $pendingRequest->breaks : $attendance->breakTimes;
+    @endphp
+
+    @foreach($breaks as $index => $break)
     <tr>
         <th>休憩{{ $index + 1 }}</th>
-        <td>
-            <div class="time-group">
+            <td>
 
-                <input type="time" name="break_start[]"
-                    value="{{ old("break_start.$index",
-                        $break->break_start
-                            ? \Carbon\Carbon::parse($break->break_start)->format('H:i')
-                            : '') }}" {{ $pendingRequest ? 'disabled' : '' }}>
+            @if($pendingRequest)
 
-                <span>～</span>
+                {{ \Carbon\Carbon::parse($break->break_start)->format('H:i') }}
+                ～
+                {{ $break->break_end ? \Carbon\Carbon::parse($break->break_end)->format('H:i') : '' }}
 
-                <input type="time" name="break_end[]"
-                    value="{{ old("break_end.$index",
-                        $break->break_end
-                            ? \Carbon\Carbon::parse($break->break_end)->format('H:i')
-                            : '') }}"
-                            {{ $pendingRequest ? 'disabled' : '' }}>
+            @else
 
-            </div>
+                <div class="time-group">
+                    <input type="time" name="break_start[]"
+                        value="{{ old("break_start.$index",
+                            $break->break_start
+                                ? \Carbon\Carbon::parse($break->break_start)->format('H:i')
+                                : '') }}">
 
-            @error("break_start.$index")
-                <p class="error">{{ $message }}</p>
-            @enderror
+                    <span>～</span>
 
-            @error("break_end.$index")
-                <p class="error">{{ $message }}</p>
-            @enderror
-        </td>
+                    <input type="time" name="break_end[]"
+                        value="{{ old("break_end.$index",
+                            $break->break_end
+                                ? \Carbon\Carbon::parse($break->break_end)->format('H:i')
+                                : '') }}">
+                </div>
+
+                @error("break_start.$index")
+                    <p class="error">{{ $message }}</p>
+                @enderror
+
+                @error("break_end.$index")
+                    <p class="error">{{ $message }}</p>
+                @enderror
+
+            @endif
+
+            </td>
     </tr>
     @endforeach
 
     {{-- 休憩追加 --}}
+    @if(!$pendingRequest)
     @php
-    $nextIndex = count($attendance->breakTimes);
+        $nextIndex = count($breaks);
     @endphp
 
     <tr>
         <th>休憩{{ $nextIndex + 1 }}</th>
         <td>
             <div class="time-group">
-                <input type="time" name="break_start[]"
-                    value="{{ old("break_start.$nextIndex") }}"
-                    {{ $pendingRequest ? 'disabled' : '' }}>
-
+                <input type="time" name="break_start[]" value="{{ old("break_start.$nextIndex") }}">
                 <span>～</span>
-
-                <input type="time" name="break_end[]"
-                    value="{{ old("break_end.$nextIndex") }}"
-                    {{ $pendingRequest ? 'disabled' : '' }}>
+                <input type="time" name="break_end[]" value="{{ old("break_end.$nextIndex") }}">
             </div>
 
             @error("break_start.$nextIndex")
@@ -139,6 +160,7 @@
             @enderror
         </td>
     </tr>
+    @endif
 
     {{-- 備考 --}}
     <tr>
@@ -147,14 +169,10 @@
 
         @if($pendingRequest)
 
-            {{-- 申請中 → 編集不可 --}}
-            <textarea name="note" class="note-area" {{ $pendingRequest ? 'disabled' : '' }}>
-                {{ old('note', $attendance->note) }}
-            </textarea>
+            {{ $pendingRequest->requested_note }}
 
         @else
 
-            {{-- 通常 → 編集可能 --}}
             <textarea name="note" class="note-area">
                 {{ old('note', $attendance->note) }}
             </textarea>
@@ -182,7 +200,7 @@
     {{-- 申請中メッセージ --}}
     @if($pendingRequest)
         <p class="pending-message">
-            ※修正申請中のため修正はできません。
+            *修正申請中のため修正はできません。
         </p>
     @endif
 </form>

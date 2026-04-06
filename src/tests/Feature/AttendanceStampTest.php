@@ -57,12 +57,20 @@ public function 休憩中ステータスが表示される()
 {
     $user = User::factory()->create();
 
-    Attendance::create([
-        'user_id'=>$user->id,
-        'work_date'=>now(),
-        'work_start_datetime'=>now(),
-        'status'=>Attendance::STATUS_ON_BREAK
+    $attendance = Attendance::create([
+        'user_id' => $user->id,
+        'work_date' => now(),
+        'work_start_datetime' => now(),
     ]);
+
+    \App\Models\BreakTime::create([
+        'attendance_id' => $attendance->id,
+        'break_start' => now(),
+        'break_end' => null,
+    ]);
+
+    $attendance->refresh();
+    $attendance->save();
 
     $response = $this->actingAs($user)->get('/attendance');
 

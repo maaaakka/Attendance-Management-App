@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Attendance;
-use App\Models\CorrectionRequestAttendance as CorrectionAttendance;;
+use App\Models\CorrectionRequestAttendance as CorrectionAttendance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Requests\CorrectionRequestAttendance as CorrectionRequest;
+use App\Http\Requests\CorrectionRequestAttendance;
 
 class AdminAttendanceController extends Controller
 {
@@ -86,6 +86,8 @@ class AdminAttendanceController extends Controller
 
     public function update(CorrectionRequestAttendance $request, $id)
     {
+        $validated = $request->validated();
+
         $date = $request->query('date');
 
         // ① 勤怠取得（or 新規作成）

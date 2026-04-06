@@ -23,79 +23,118 @@ class CorrectionRequestAttendance extends FormRequest
      * @return array
      */
     public function rules()
-{
-    return [
-        'work_start_datetime' => ['nullable'],
-        'work_end_datetime' => ['nullable'],
+    {
+        return [
+            'work_start_datetime' => ['nullable'],
+            'work_end_datetime' => ['nullable'],
 
-        'break_start.*' => ['nullable'],
-        'break_end.*' => ['nullable'],
+            'break_start.*' => ['nullable'],
+            'break_end.*' => ['nullable'],
 
-        'note' => ['required'],
-    ];
-}
+            'note' => ['required'],
+        ];
+    }
 
-public function messages()
-{
-    return [
-        'note.required' => '備考を記入してください',
-    ];
-}
+    public function messages()
+    {
+        return [
+            'note.required' => '備考を記入してください',
+        ];
+    }
 
-public function withValidator($validator)
-{
-    $validator->after(function ($validator) {
 
-        $start = $this->work_start_datetime;
-        $end   = $this->work_end_datetime;
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
 
-        // 出退勤
-        if (!$start || !$end || $start >= $end) {
-            $validator->errors()->add(
-                'work_start_datetime',
-                '出勤時間もしくは退勤時間が不適切な値です'
-            );
-        }
+            $start = $this->work_start_datetime;
+            $end   = $this->work_end_datetime;
 
-        // 休憩
-        if (is_array($this->break_start)) {
-            foreach ($this->break_start as $index => $bStart) {
+            // =========================
+            // 出退勤
+            // =========================
 
-                $bEnd = $this->break_end[$index] ?? null;
+            // 片方だけ
+            if (($start && !$end) || (!$start && $end)) {
+                $validator->errors()->add(
+                    'work_start_datetime',
+                    '出勤時間もしくは退勤時間が不適切な値です'
+                );
+            }
 
-                // 両方空ならスルー
-                if (!$bStart && !$bEnd) {
-                    continue;
-                }
-
-                 // 前後チェック
-                if ($bStart && $bEnd && $bStart >= $bEnd) {
+            // 前後関係
+            if ($start && $end) {
+                if (\Carbon\Carbon::parse($start) >= \Carbon\Carbon::parse($end)) {
                     $validator->errors()->add(
-                        "break_start.$index",
-                        '休憩時間が不適切な値です'
-                    );
-                }
-
-                // 開始チェック（入力されている場合のみ）
-                if ($bStart && (
-                    ($start && $bStart < $start) ||
-                    ($end && $bStart > $end)
-                )) {
-                    $validator->errors()->add(
-                        "break_start.$index",
-                        '休憩時間が不適切な値です'
-                    );
-                }
-
-                // 終了チェック（入力されている場合のみ）
-                if ($bEnd && $end && $bEnd > $end) {
-                    $validator->errors()->add(
-                        "break_end.$index",
-                        '休憩時間もしくは退勤時間が不適切な値です'
+                        'work_start_datetime',
+                        '出勤時間もしくは退勤時間が不適切な値です'
                     );
                 }
             }
-        }
-    });
-}
+
+            // =========================
+            // 休憩
+            // =========================
+
+            if (is_array($this->break_start)) {
+                foreach ($this->break_start as $index => $bStart) {
+
+                    $bEnd = $this->break_end[$index] ?? null;
+
+                    // 両方空 → OK
+                    if (!$bStart && !$bEnd) continue;
+
+                    // 🔥 片方だけ
+                    if (($bStart && !$bEnd) || (!$bStart && $bEnd)) {
+                        $validator->errors()->add(
+                            "break_start.$index",
+                            '休憩時間が不適切な値です'
+                        );
+                        continue;
+                    }
+
+                    $bStartTime = \Carbon\Carbon::parse($bStart);
+                    $bEndTime   = \Carbon\Carbon::parse($bEnd);
+
+                    // 前後逆転
+                    if ($bStartTime >= $bEndTime) {
+                        $validator->errors()->add(
+                            "break_start.$index",
+                            '休憩時間が不適切な値です'
+                        );
+                    }
+
+                    //  勤務時間外
+                    if ($start && $end) {
+
+                        $workStart = \Carbon\Carbon::parse($start);
+                        $workEnd   = \Carbon\Carbon::parse($end);
+
+                        // 開始が外
+                        if ($bStartTime < $workStart) {
+                            $validator->errors()->add(
+                                "break_start.$index",
+                                '休憩時間が不適切な値です'
+                            );
+                        }
+
+                        if ($bStartTime > $workEnd) {
+                            $validator->errors()->add(
+                                "break_start.$index",
+                                '休憩時間が不適切な値です'
+                            );
+                        }
+
+                        // 終了が外 
+                        if ($bEndTime > $workEnd) {
+                            $validator->errors()->add(
+                                "break_end.$index",
+                                '休憩時間もしくは退勤時間が不適切な値です'
+                            );
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
