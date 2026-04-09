@@ -173,9 +173,7 @@
 
         @else
 
-            <textarea name="note" class="note-area">
-                {{ old('note', $attendance->note) }}
-            </textarea>
+            <textarea name="note" class="note-area">{{ old('note', $attendance->note) }}</textarea>
 
             @error('note')
                 <p class="error">{{ $message }}</p>

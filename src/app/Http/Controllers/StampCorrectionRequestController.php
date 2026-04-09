@@ -119,6 +119,6 @@ class StampCorrectionRequestController extends Controller
         $attendance->updateStatus();
         $attendance->save();
 
-        return back();
+        return back()->with('success', '承認に成功しました！');;
     }
 }

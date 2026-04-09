@@ -10,22 +10,23 @@
 
 <h1 class="page-title">勤怠一覧</h1>
 
-<div class="month-nav">
+    <div class="month-nav">
 
-<a href="{{ route('attendance.list',['month'=>\Carbon\Carbon::parse($month)->subMonth()->format('Y-m')]) }}">
-<span class="arrow">←</span> 前月
-</a>
+        <a href="{{ route('attendance.list',['month'=>\Carbon\Carbon::parse($month)->subMonth()->format('Y-m')]) }}">
+            <span class="arrow">←</span> 前月
+        </a>
 
-<div class="month">
-    <span class="calendar-icon">📅</span>
-{{ \Carbon\Carbon::parse($month)->format('Y/m') }}
-</div>
+        <div class="month">
+            <span class="calendar-icon">📅</span>
+        {{ \Carbon\Carbon::parse($month)->format('Y/m') }}
+        </div>
 
-<a href="{{ route('attendance.list',['month'=>\Carbon\Carbon::parse($month)->addMonth()->format('Y-m')]) }}">
-翌月 <span class="arrow">→</span>
-</a>
+        <a href="{{ route('attendance.list',['month'=>\Carbon\Carbon::parse($month)->addMonth()->format('Y-m')]) }}">
+        翌月
+            <span class="arrow">→</span>
+        </a>
 
-</div>
+    </div>
 
 <table class="attendance-table">
 
@@ -111,11 +112,9 @@ if ($attendance && $attendance->work_end_datetime) {
 </td>
 
 <td>
-
-<a href="{{ route('attendance.detail', $attendance?->id ?? $date->format('Y-m-d')) }}">
-詳細
-</a>
-
+    <a href="{{ route('attendance.detail', $attendance?->id ?? $date->format('Y-m-d')) }}">
+    詳細
+    </a>
 </td>
 
 </tr>

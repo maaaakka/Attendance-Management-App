@@ -9,7 +9,7 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    // ⭐ ステータス定数
+    // ステータス定数
     const STATUS_OFF_WORK = 1;   // 勤務外
     const STATUS_WORKING = 2;    // 勤務中
     const STATUS_ON_BREAK = 3;   // 休憩中
@@ -71,11 +71,11 @@ class Attendance extends Model
     }
 
     protected static function boot()
-{
-    parent::boot();
+    {
+        parent::boot();
 
-    static::saving(function ($attendance) {
-        $attendance->updateStatus();
-    });
-}
+        static::saving(function ($attendance) {
+            $attendance->updateStatus();
+        });
+    }
 }

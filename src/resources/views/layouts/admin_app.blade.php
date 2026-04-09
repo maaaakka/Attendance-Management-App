@@ -43,15 +43,13 @@
 
     </div>
 </header>
-
-
-<main>
-    @yield('content')
-</main>
     @if(session('success'))
         <div class="toast">
             {{ session('success') }}
         </div>
     @endif
+<main>
+    @yield('content')
+</main>
 </body>
 </html>

@@ -89,7 +89,7 @@ class AdminAttendanceDetailTest extends TestCase
                 'work_date' => today(),
                 'work_start_datetime' => '09:00',
                 'work_end_datetime' => '18:00',
-                'break_start' => ['19:00'], // ← 退勤後
+                'break_start' => ['19:00'],
                 'break_end' => ['19:30'],
                 'note' => 'テスト',
             ]);
@@ -117,7 +117,7 @@ class AdminAttendanceDetailTest extends TestCase
                 'work_start_datetime' => '09:00',
                 'work_end_datetime' => '18:00',
                 'break_start' => ['17:00'],
-                'break_end' => ['19:00'], // ← 退勤後
+                'break_end' => ['19:00'],
                 'note' => 'テスト',
             ]);
 
@@ -143,7 +143,7 @@ class AdminAttendanceDetailTest extends TestCase
                 'work_date' => today(),
                 'work_start_datetime' => '09:00',
                 'work_end_datetime' => '18:00',
-                'note' => '', // ← 未入力
+                'note' => '',
             ]);
 
         $response->assertSessionHasErrors([

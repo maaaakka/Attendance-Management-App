@@ -47,6 +47,7 @@ class AttendanceListTest extends TestCase
 
         $response->assertSee(now()->format('m'));
     }
+
     /** @test */
     public function 前月ボタンで前月の情報が表示される()
     {

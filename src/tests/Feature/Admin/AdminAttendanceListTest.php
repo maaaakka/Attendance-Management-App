@@ -45,11 +45,9 @@ class AdminAttendanceListTest extends TestCase
 
         $response->assertStatus(200);
 
-        // 名前表示
         $response->assertSee($user1->name);
         $response->assertSee($user2->name);
 
-        // 時刻確認（フォーマットに注意）
         $response->assertSee('09:00');
         $response->assertSee('10:00');
     }
@@ -84,7 +82,6 @@ class AdminAttendanceListTest extends TestCase
         $response = $this->actingAs($admin, 'admin')
             ->get('/admin/attendance/list?date=' . $yesterday->toDateString());
 
-        // ✅ ここが正しい位置
         $response->assertSee($yesterday->format('Y/m/d'));
         $response->assertSee($user->name);
     }
@@ -106,7 +103,6 @@ class AdminAttendanceListTest extends TestCase
         $response = $this->actingAs($admin, 'admin')
             ->get('/admin/attendance/list?date=' . $tomorrow->toDateString());
 
-        // ✅ フォーマット統一
         $response->assertSee($tomorrow->format('Y/m/d'));
         $response->assertSee($user->name);
     }

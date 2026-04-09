@@ -123,12 +123,12 @@ class AdminAttendanceController extends Controller
 
             $end = $request->break_end[$index] ?? null;
 
-            // 🔥 空はスキップ（←重要）
+            // 空はスキップ
             if (empty($start) && empty($end)) {
                 continue;
             }
 
-            // 🔥 片方だけ入力はエラー
+            // 片方だけ入力はエラー
             if (($start && !$end) || (!$start && $end)) {
                 return back()->withErrors([
                     "break_start.$index" => '休憩開始時間と終了時間を入力してください'

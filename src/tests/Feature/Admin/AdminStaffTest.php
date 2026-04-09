@@ -48,7 +48,7 @@ class AdminStaffTest extends TestCase
             ->get('/admin/attendance/staff/' . $user->id);
 
         $response->assertSee($user->name);
-        $response->assertSee($date->format('Y年m月')); // 月表示
+        $response->assertSee($date->format('Y年m月'));
     }
 
     /** @test */

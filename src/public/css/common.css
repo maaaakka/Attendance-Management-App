@@ -91,13 +91,23 @@ button {
 
 .toast {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    top: 80px;
+    left: 20px;
+
     background: #333;
     color: #fff;
-    padding: 12px 20px;
+
+    padding: 10px 16px;
     border-radius: 5px;
     font-size: 14px;
-    opacity: 0.9;
+
+    width: auto;
+    /* ← 自動サイズ */
+    max-width: 300px;
+    /* ← 最大幅制限 */
+    display: inline-block;
+    /* ← 横幅を内容に合わせる */
+
+    opacity: 0.95;
     z-index: 9999;
 }

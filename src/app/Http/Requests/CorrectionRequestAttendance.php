@@ -50,9 +50,7 @@ class CorrectionRequestAttendance extends FormRequest
             $start = $this->work_start_datetime;
             $end   = $this->work_end_datetime;
 
-            // =========================
             // 出退勤
-            // =========================
 
             // 片方だけ
             if (($start && !$end) || (!$start && $end)) {
@@ -72,19 +70,17 @@ class CorrectionRequestAttendance extends FormRequest
                 }
             }
 
-            // =========================
             // 休憩
-            // =========================
 
             if (is_array($this->break_start)) {
                 foreach ($this->break_start as $index => $bStart) {
 
                     $bEnd = $this->break_end[$index] ?? null;
 
-                    // 両方空 → OK
+                    // 両方空
                     if (!$bStart && !$bEnd) continue;
 
-                    // 🔥 片方だけ
+                    // 片方だけ
                     if (($bStart && !$bEnd) || (!$bStart && $bEnd)) {
                         $validator->errors()->add(
                             "break_start.$index",
@@ -125,7 +121,7 @@ class CorrectionRequestAttendance extends FormRequest
                             );
                         }
 
-                        // 終了が外 
+                        // 終了が外
                         if ($bEndTime > $workEnd) {
                             $validator->errors()->add(
                                 "break_end.$index",
