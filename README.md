@@ -56,11 +56,11 @@ php artisan migrate
 php artisan db:seed
 ```
 一般ユーザー６人分
-- 名前	 ユーザー1
+- 名前	 ユーザー1、
 		ユーザー2
 		、、、
 		ユーザー6
-- アドレス   user1@test.com
+- アドレス   user1@test.com、
            	user2@test.com
 		   	、、、
 		   	user6@test.com
@@ -73,11 +73,13 @@ php artisan db:seed
 
 9. mailhog設定
 docker-compose.ymlに追記
+``` text
 mailhog:
         image: mailhog/mailhog
         ports:
             - "1025:1025"
             - "8025:8025"
+```
 
 .envに以下の環境変数を追加
 ``` text
