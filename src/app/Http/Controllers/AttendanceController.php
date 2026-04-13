@@ -28,8 +28,6 @@ class AttendanceController extends Controller
         return view('attendance.index', compact('user', 'status'));
     }
 
-
-    // 出勤
     public function startWork()
     {
         $user = Auth::user();
@@ -46,8 +44,6 @@ class AttendanceController extends Controller
         return redirect()->route('attendance.index');
     }
 
-
-    // 休憩入
     public function startBreak()
     {
         $user = Auth::user();
@@ -66,7 +62,7 @@ class AttendanceController extends Controller
             ->exists();
 
         if ($activeBreak) {
-            return back()->with('error', 'すでに休憩中です');
+            return back();
         }
 
         BreakTime::create([
@@ -79,8 +75,6 @@ class AttendanceController extends Controller
         return redirect()->route('attendance.index');
     }
 
-
-    // 休憩戻
     public function endBreak()
     {
         $user = Auth::user();
@@ -104,7 +98,6 @@ class AttendanceController extends Controller
     }
 
 
-    // 退勤
     public function endWork()
     {
         $user = Auth::user();
@@ -119,7 +112,6 @@ class AttendanceController extends Controller
         return redirect()->route('attendance.index');
     }
 
-    // 勤怠一覧
     public function list(Request $request)
     {
         $user = Auth::user();
@@ -129,7 +121,6 @@ class AttendanceController extends Controller
         $start = Carbon::parse($month)->startOfMonth();
         $end = Carbon::parse($month)->endOfMonth();
 
-        // 勤怠データ取得
         $attendances = Attendance::where('user_id', $user->id)
             ->whereBetween('work_date', [$start, $end])
             ->get()
@@ -137,7 +128,6 @@ class AttendanceController extends Controller
                 return Carbon::parse($item->work_date)->format('Y-m-d');
             });
 
-        // 1ヶ月の日付
         $dates = CarbonPeriod::create($start, $end);
 
         return view('attendance.list', compact(
@@ -147,21 +137,17 @@ class AttendanceController extends Controller
         ));
     }
 
-    // 詳細
     public function detail($id)
     {
-        // 数値かどうか判定
         if (is_numeric($id)) {
             $attendance = Attendance::with('breakTimes','user')->find($id);
         } else {
-            // 日付として取得
             $attendance = Attendance::with('breakTimes','user')
                 ->where('user_id', Auth::id())
                 ->whereDate('work_date', $id)
                 ->first();
         }
 
-        // データなし
         if (!$attendance) {
             $attendance = new Attendance();
             $attendance->id = null;
@@ -210,10 +196,8 @@ class AttendanceController extends Controller
         ));
     }
 
-    // 修正申請
     public function requestCorrection(CorrectionRequestAttendance $request, $id)
     {
-        // 勤怠データ取得（無ければ作成）
         if (is_numeric($id)) {
             $attendance = Attendance::findOrFail($id);
         } else {
@@ -221,7 +205,6 @@ class AttendanceController extends Controller
                 ->whereDate('work_date', $id)
                 ->first();
 
-            // 無ければ作成
             if (!$attendance) {
                 $attendance = Attendance::create([
                     'user_id' => auth()->id(),
@@ -230,12 +213,10 @@ class AttendanceController extends Controller
             }
         }
 
-        // 休憩データ読み込み
         $attendance->load('breakTimes');
 
         $workDate = $attendance->work_date;
 
-        // 勤怠修正申請
         $correction = CorrectionAttendance::create([
 
             'attendance_id' => $attendance->id,
@@ -249,7 +230,6 @@ class AttendanceController extends Controller
             'status' => CorrectionAttendance::STATUS_PENDING
         ]);
 
-        // 休憩修正申請
         if ($request->break_start) {
 
             foreach ($request->break_start as $index => $start) {

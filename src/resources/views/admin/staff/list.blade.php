@@ -39,7 +39,7 @@
 
 </table>
 
-    <div class="pagination">
+    <div class="pagination-wrapper">
         {{ $users->links() }}
     </div>
 

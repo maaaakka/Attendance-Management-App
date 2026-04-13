@@ -16,16 +16,13 @@ class AdminAttendanceListTest extends TestCase
     /** @test */
     public function その日の全ユーザーの勤怠情報が表示される()
     {
-        // 管理者
         $admin = Admin::factory()->create();
 
-        // 一般ユーザー
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
 
         $today = Carbon::today();
 
-        // 勤怠
         Attendance::create([
             'user_id' => $user1->id,
             'work_date' => $today,

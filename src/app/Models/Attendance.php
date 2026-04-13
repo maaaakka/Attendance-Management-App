@@ -9,7 +9,6 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    // ステータス定数
     const STATUS_OFF_WORK = 1;   // 勤務外
     const STATUS_WORKING = 2;    // 勤務中
     const STATUS_ON_BREAK = 3;   // 休憩中
@@ -40,16 +39,13 @@ class Attendance extends Model
     }
     public function updateStatus()
     {
-        // 出勤してない
         if (!$this->work_start_datetime) {
             $this->status = self::STATUS_OFF_WORK;
             return;
         }
 
-        // 出勤済み・退勤してない
         if ($this->work_start_datetime && !$this->work_end_datetime) {
 
-            // 休憩中チェック
             $onBreak = $this->breakTimes()
                 ->whereNull('break_end')
                 ->exists();
@@ -63,7 +59,6 @@ class Attendance extends Model
             return;
         }
 
-        // 退勤済み
         if ($this->work_end_datetime) {
             $this->status = self::STATUS_LEFT;
             return;

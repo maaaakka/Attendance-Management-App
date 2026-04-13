@@ -24,7 +24,7 @@ class AttendanceDetailTest extends TestCase
             'work_date' => now(),
             'work_start_datetime' => now(),
             'work_end_datetime' => now(),
-            'status' => 3
+            'status' => Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)
@@ -43,7 +43,7 @@ class AttendanceDetailTest extends TestCase
             'work_date' => now(),
             'work_start_datetime' => now(),
             'work_end_datetime' => now(),
-            'status' => 3
+            'status' => Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)
@@ -68,7 +68,7 @@ class AttendanceDetailTest extends TestCase
             'work_date' => now(),
             'work_start_datetime' => now()->setTime(9,0),
             'work_end_datetime' => now()->setTime(18,0),
-            'status' => 3
+            'status' => Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)
@@ -93,7 +93,7 @@ class AttendanceDetailTest extends TestCase
             'work_date' => now(),
             'work_start_datetime' => now(),
             'work_end_datetime' => now(),
-            'status' => 3
+            'status' => Attendance::STATUS_LEFT
         ]);
 
         $break = BreakTime::create([

@@ -25,7 +25,7 @@ class AttendanceUpdateTest extends TestCase
             'work_date'=>now(),
             'work_start_datetime'=>now()->setTime(9,0),
             'work_end_datetime'=>now()->setTime(18,0),
-            'status'=>3
+            'status'=>Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)->post("/attendance/request/{$attendance->id}",[
@@ -47,7 +47,7 @@ class AttendanceUpdateTest extends TestCase
             'work_date'=>now(),
             'work_start_datetime'=>now()->setTime(9,0),
             'work_end_datetime'=>now()->setTime(18,0),
-            'status'=>3
+            'status'=>Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)->post(
@@ -74,7 +74,7 @@ class AttendanceUpdateTest extends TestCase
             'work_date'=>now(),
             'work_start_datetime'=>now()->setTime(9,0),
             'work_end_datetime'=>now()->setTime(18,0),
-            'status'=>3
+            'status'=>Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)->post(
@@ -101,7 +101,7 @@ class AttendanceUpdateTest extends TestCase
             'work_date'=>now(),
             'work_start_datetime'=>now()->setTime(9,0),
             'work_end_datetime'=>now()->setTime(18,0),
-            'status'=>3
+            'status'=>Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)->post("/attendance/request/{$attendance->id}",[
@@ -123,7 +123,7 @@ class AttendanceUpdateTest extends TestCase
             'work_date'=>now(),
             'work_start_datetime'=>now()->setTime(9,0),
             'work_end_datetime'=>now()->setTime(18,0),
-            'status'=>3
+            'status'=>Attendance::STATUS_LEFT
         ]);
 
         $this->actingAs($user)->post("/attendance/request/{$attendance->id}",[
@@ -169,7 +169,7 @@ class AttendanceUpdateTest extends TestCase
             'work_date'=>now(),
             'work_start_datetime'=>now(),
             'work_end_datetime'=>now(),
-            'status'=>3
+            'status'=>Attendance::STATUS_LEFT
         ]);
 
         $response = $this->actingAs($user)

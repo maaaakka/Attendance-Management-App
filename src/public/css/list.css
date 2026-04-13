@@ -1,9 +1,7 @@
-/* 全体背景 */
 body {
     background-color: #f5f5f5;
 }
 
-/* タイトル */
 .page-title {
     font-size: 24px;
     font-weight: bold;
@@ -12,7 +10,6 @@ body {
     margin-bottom: 50px;
 }
 
-/* タブ */
 .tab-menu {
     display: flex;
     gap: 60px;
@@ -29,10 +26,8 @@ body {
 .tab-menu a.active {
     color: #000;
     font-weight: bold;
-    
 }
 
-/* テーブル全体 */
 .request-table {
     width: 100%;
     border-collapse: collapse;
@@ -42,14 +37,10 @@ body {
 
 .request-table a {
     text-decoration: none;
-    /* 下線消す */
     color: #000;
-    /* 黒にする */
     font-weight: bold;
-    /* 太文字 */
 }
 
-/* ヘッダー */
 .request-table th {
     padding: 12px;
     border-bottom: 2px solid #ddd;
@@ -57,7 +48,6 @@ body {
     font-size: 14px;
 }
 
-/* データ */
 .request-table td {
     padding: 12px;
     text-align: center;
@@ -65,7 +55,6 @@ body {
     font-size: 14px;
 }
 
-/* 行ホバー（任意） */
 .request-table tr:hover {
     background-color: #fafafa;
 }
@@ -73,6 +62,7 @@ body {
 .request-list {
     width: 900px;
     margin: 40px auto;
+    min-height: 600px;
 }
 
 .tab-menu {
@@ -138,4 +128,8 @@ body {
 
 .pagination a:hover {
     background-color: #f5f5f5;
+}
+
+.pagination-wrapper {
+    min-height: 60px;
 }

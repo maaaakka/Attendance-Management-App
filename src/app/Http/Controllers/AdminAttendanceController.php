@@ -11,18 +11,14 @@ use App\Http\Requests\CorrectionRequestAttendance;
 
 class AdminAttendanceController extends Controller
 {
-    // 一覧
     public function list(Request $request)
     {
-        // 日付取得（なければ今日）
         $date = $request->input('date')
             ? Carbon::parse($request->date)
             : Carbon::today();
 
-        // 全ユーザー
-        $users = User::paginate(8);
+        $users = User::paginate(8)->appends($request->query());
 
-        // その日の勤怠を user_id でまとめる
         $attendances = Attendance::whereDate('work_date', $date)
             ->with('breakTimes')
             ->get()
@@ -39,7 +35,6 @@ class AdminAttendanceController extends Controller
     {
         $date = $request->date;
 
-        // dateあり → user_id扱い
         if ($date) {
 
             $attendance = Attendance::with(['user', 'breakTimes'])
@@ -47,7 +42,6 @@ class AdminAttendanceController extends Controller
                 ->whereDate('work_date', $date)
                 ->first();
 
-            // なければ空データ
             if (!$attendance) {
                 $attendance = new Attendance();
                 $attendance->id = null;
@@ -71,7 +65,6 @@ class AdminAttendanceController extends Controller
             ));
         }
 
-        // dateなし → attendance_id扱い
         $attendance = Attendance::with(['user', 'breakTimes'])->findOrFail($id);
 
         $pendingRequest = CorrectionAttendance::where('attendance_id', $attendance->id)
@@ -90,9 +83,7 @@ class AdminAttendanceController extends Controller
 
         $date = $request->query('date');
 
-        // ① 勤怠取得（or 新規作成）
         if ($date) {
-            // user_idとして扱う
             $attendance = Attendance::where('user_id', $id)
                 ->whereDate('work_date', $date)
                 ->first();
@@ -104,31 +95,26 @@ class AdminAttendanceController extends Controller
                 ]);
             }
         } else {
-            // attendance_idとして扱う
             $attendance = Attendance::findOrFail($id);
             $date = $attendance->work_date;
         }
 
-        // ② 勤怠更新
         $attendance->update([
             'work_start_datetime' => $date . ' ' . $request->work_start_datetime,
             'work_end_datetime' => $date . ' ' . $request->work_end_datetime,
             'note' => $request->note,
         ]);
 
-        // ③ 休憩更新
         $existingBreaks = $attendance->breakTimes;
 
         foreach ($request->break_start as $index => $start) {
 
             $end = $request->break_end[$index] ?? null;
 
-            // 空はスキップ
             if (empty($start) && empty($end)) {
                 continue;
             }
 
-            // 片方だけ入力はエラー
             if (($start && !$end) || (!$start && $end)) {
                 return back()->withErrors([
                     "break_start.$index" => '休憩開始時間と終了時間を入力してください'
@@ -163,7 +149,6 @@ class AdminAttendanceController extends Controller
             'note' => $request->note,
         ]);
 
-        // 休憩
         if ($request->break_start) {
             foreach ($request->break_start as $index => $start) {
 

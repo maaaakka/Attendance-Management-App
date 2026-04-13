@@ -16,13 +16,16 @@ class AttendanceStampTest extends TestCase
     /** @test */
     public function 現在日時が正しく表示される()
     {
-        Carbon::setTestNow(Carbon::create(2026,3,15,9,0));
+        $now = Carbon::now();
+        Carbon::setTestNow($now);
 
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get('/attendance');
 
-        $response->assertSee(now()->year);
+        $response->assertSee($now->format('Y年n月j日'));
+
+        $response->assertSee($now->format('H:i'));
     }
 
     /** @test */

@@ -71,7 +71,6 @@ class CorrectionRequestAttendance extends FormRequest
             }
 
             // 休憩
-
             if (is_array($this->break_start)) {
                 foreach ($this->break_start as $index => $bStart) {
 

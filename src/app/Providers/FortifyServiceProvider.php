@@ -26,7 +26,6 @@ class FortifyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // ★ここ重要
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
     }
 
@@ -64,16 +63,9 @@ class FortifyServiceProvider extends ServiceProvider
                 'password.required' => 'パスワードを入力してください',
             ])->validate();
 
-            // ★管理者（ここ変更）
                 if ($request->is('admin/*')) {
 
                 $admin = Admin::where('email', $request->email)->first();
-
-                // dd([
-                //     'message' => '管理者テーブルを確認中',
-                //     'request_url' => $request->fullUrl(),
-                //     'found_admin' => $admin,
-                // ]);
 
                 if ($admin && Hash::check($request->password, $admin->password)) {
                     return $admin;
@@ -84,13 +76,7 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
             }
 
-            // 一般ユーザー
             $user = User::where('email', $request->email)->first();
-
-            // dd([
-            //     'message' => '一般ユーザーテーブルを確認中',
-            //     'found_user' => $user,
-            // ]);
 
             if ($user && Hash::check($request->password, $user->password)) {
                 return $user;

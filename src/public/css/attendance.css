@@ -71,6 +71,7 @@ body{
 .attendance-list {
     width: 800px;
     margin: 20px auto;
+    min-height: 600px;
 }
 
 .page-title {
@@ -366,4 +367,8 @@ input[type="time"]{
 
 .pagination a:hover {
     background-color: #f5f5f5;
+}
+
+.pagination-wrapper {
+    min-height: 80px;
 }
