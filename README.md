@@ -15,7 +15,7 @@
 エラーが発生する場合は、docker-compose.ymlファイルの「mysql」内に「platform」の項目を追加で記載してください*
 ``` bash
 mysql:
-    platform: linux/amd64(この文追加)
+    platform: linux/amd64  # ← M1/M2の場合のみ追加
     image: mysql:8.0.26
     environment:
 ```
@@ -23,7 +23,7 @@ mysql:
 **Laravel環境構築**
 1. `docker-compose exec php bash`
 2. `composer install`
-3. 「.env.example」ファイルを 「.env」ファイルに命名を変更。または、新しく.envファイルを作成
+3. `cp .env.example .env`
 4. .envに以下の環境変数を追加
 ``` text
 APP_URL=http://localhost
@@ -46,32 +46,7 @@ php artisan vendor:publish --provider="Laravel\Fortify\FortifyServiceProvider"
 php artisan key:generate
 ```
 
-7. マイグレーションの実行
-``` bash
-php artisan migrate
-```
-
-8. シーディングの実行(ダミーデータ)
-``` bash
-php artisan db:seed
-```
-一般ユーザー６人分
-- 名前	 ユーザー1、
-		ユーザー2
-		、、、
-		ユーザー6
-- アドレス   user1@test.com、
-           	user2@test.com
-		   	、、、
-		   	user6@test.com
-- パスワード(全ユーザー)	password
-
-管理者ユーザー１人分
-- 名前		管理者
-- アドレス	 admin@test.com
-- パスワード password
-
-9. mailhog設定
+7. mailhog設定
 docker-compose.ymlに追記
 ``` text
 mailhog:
@@ -96,7 +71,29 @@ MAIL_FROM_NAME="${APP_NAME}"
 ```bash
 docker-compose up -d
 ```
+ブラウザでアクセスしてメールを確認できます
 URL http://localhost:8025
+
+8. マイグレーションの実行
+``` bash
+php artisan migrate
+```
+
+9. シーディングの実行(ダミーデータ)
+``` bash
+php artisan db:seed
+```
+一般ユーザー６人分
+- 名前	 ユーザー1〜ユーザー6
+        (それぞれ数字部分のみ変更でログイン可)
+- アドレス   user1@test.com〜user6@test.com
+            (それぞれ数字部分のみ変更でログイン可)
+- パスワード(全ユーザー)	password
+
+管理者ユーザー１人分
+- 名前		管理者
+- アドレス	 admin@test.com
+- パスワード password
 
 
 10. テスト用DB設定
@@ -113,6 +110,7 @@ CREATE DATABASE attendance_test;
 APP_ENV=testing
 APP_KEY=
 ※ 以下のコマンドで自動生成
+php artisan key:generate
 php artisan key:generate --env=testing
 
 APP_DEBUG=true
@@ -152,6 +150,7 @@ php artisan test
 - .env と .env.testing の設定ミスに注意してください
 - テスト実行時は .env.testingを使用し、本番データには影響しません
 - 本プロジェクトでは RefreshDatabase を使用しているため、テスト実行時に自動でマイグレーションが実行されます。そのため、通常は php artisan migrate --env=testing の実行は不要です。
+- ※ テスト実行時にエラーが出る場合はattendance_test データベースが既に存在している可能性があります。その場合は削除後、再作成してください。(エラー時の対処例：rm -rf /var/lib/mysql/attendance_test)
 
 
 ## 主な機能
