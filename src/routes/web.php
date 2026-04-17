@@ -29,6 +29,17 @@ use App\Http\Controllers\AdminStaffController;
         return redirect('/login');
     });
 
+    // メール認証
+    Route::get('/redirect', function () {
+        $user = auth()->user();
+
+        if (!$user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
+        return redirect()->route('attendance.index');
+    });
+
     Route::middleware(['auth','verified'])->group(function () {
 
     // 出勤前
