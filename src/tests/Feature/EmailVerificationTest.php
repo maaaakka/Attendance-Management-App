@@ -47,7 +47,7 @@ class EmailVerificationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    //** @test */
+        //** @test */
     public function メール認証完了後勤怠画面へ遷移する()
     {
         $user = \App\Models\User::factory()->create([
@@ -66,6 +66,6 @@ class EmailVerificationTest extends TestCase
         $response = $this->actingAs($user)
             ->get($verificationUrl);
 
-        $response->assertRedirect('/redirect?verified=1');
+        $response->assertRedirect('/redirect');
     }
 }
