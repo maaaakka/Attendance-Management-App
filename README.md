@@ -35,12 +35,12 @@ DB_DATABASE=laravel_db
 DB_USERNAME=laravel_user
 DB_PASSWORD=laravel_pass
 ```
-5. Fortify導入
+5. Fortify初期設定
 ``` bash
-composer require laravel/fortify
-
 php artisan vendor:publish --provider="Laravel\Fortify\FortifyServiceProvider"
 ```
+※ 本プロジェクトでは laravel/fortify は composer.json に含まれているため追加でcomposer requireを実行する必要はありません。
+
 6. アプリケーションキーの作成
 ``` bash
 php artisan key:generate
