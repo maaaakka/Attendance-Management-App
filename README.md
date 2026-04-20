@@ -24,7 +24,7 @@ mysql:
 1. `docker-compose exec php bash`
 2. `composer install`
 3. `cp .env.example .env`
-4. .envに以下の環境変数を追加
+4. .envファイルを編集(既存設定を確認・必要に応じて変更)
 ``` text
 APP_URL=http://localhost
 
@@ -35,16 +35,16 @@ DB_DATABASE=laravel_db
 DB_USERNAME=laravel_user
 DB_PASSWORD=laravel_pass
 ```
-5. Fortify初期設定
+5. アプリケーションキーの作成
+``` bash
+php artisan key:generate
+```
+
+6. Fortify初期設定
 ``` bash
 php artisan vendor:publish --provider="Laravel\Fortify\FortifyServiceProvider"
 ```
 ※ 本プロジェクトでは laravel/fortify は composer.json に含まれているため追加でcomposer requireを実行する必要はありません。
-
-6. アプリケーションキーの作成
-``` bash
-php artisan key:generate
-```
 
 7. mailhog設定
 docker-compose.ymlに追記
@@ -67,7 +67,7 @@ MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS="admin@example.com"
 MAIL_FROM_NAME="${APP_NAME}"
 ```
-
+設定後、以下でコンテナ起動
 ```bash
 docker-compose up -d
 ```
@@ -95,6 +95,9 @@ php artisan db:seed
 - アドレス	 admin@test.com
 - パスワード password
 
+※ メール認証について
+初回登録直後は環境によりメールが即時反映されない場合があります。
+その場合は「認証メール再送」ボタンを押すことで認証可能です。
 
 10. テスト用DB設定
 ① テスト用データベース作成
@@ -110,7 +113,6 @@ CREATE DATABASE attendance_test;
 APP_ENV=testing
 APP_KEY=
 ※ 以下のコマンドで自動生成
-php artisan key:generate
 php artisan key:generate --env=testing
 
 APP_DEBUG=true
@@ -206,4 +208,4 @@ php artisan test
 - 開発環境(ユーザー画面)：http://localhost/
 - 管理者ログイン :http://localhost/admin/login
 - Mailhog :http://localhost:8025
-- phpMyAdmin:：http://localhost:8080/
+- phpMyAdmin :http://localhost:8080/
